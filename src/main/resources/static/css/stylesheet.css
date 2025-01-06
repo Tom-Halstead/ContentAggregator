@@ -1,54 +1,109 @@
 :root {
-    --gap: 20px;
-    --padding: 10px;
+  --gap: 20px;
+  --padding: 10px;
 }
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    height: 100vh;
-    align-items: center;
-    background-color: #f4f4f4;
+  padding: 0;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  justify-items: center;
+  background-color: #f4f4f4;
+}
+
+header {
+  height: 3em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  color: white;
+  padding: 10px 5%;
+  position: sticky;
+  width: 90%;
+  top: 0;
+  z-index: 1000;
+}
+
+#randomize {
+  padding: 0.5em;
+  margin: 2em;
+  border: 1px black solid;
+  border-radius: 0.8em;
+}
+
+.logo img {
+  width: 50px; /* Adjust the size of your logo */
+}
+
+.main-nav {
+  display: flex;
+  gap: 20px;
+  justify-content: space-evenly;
+  flex: 1;
+}
+
+.quick-nav {
+  display: flex;
+  gap: 2em;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
 }
 
 .container {
-    display: flex;
-    width: 80%;
-    max-width: 1200px;
-    gap: var(--gap);
+  margin: 1em;
+  justify-self: center;
+  display: flex;
+  width: 80%;
+  height: 80%;
+  max-width: 1200px;
+  gap: var(--gap);
 }
 
 .column {
-    flex: 1;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    padding: var(--padding);
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap);
+  flex: 1;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: var(--padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
 }
 
 .row {
-    background-color: #e9e9e9;
-    flex: 1;
-    border-radius: 5px;
-    padding: var(--padding);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+  background-color: #e9e9e9;
+  flex: 1;
+  border-radius: 5px;
+  padding: var(--padding);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+footer {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        align-items: center;
-    }
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
 
-    .column {
-        width: 90%;
-    }
+  .column {
+    width: 90%;
+  }
 }
