@@ -27,8 +27,8 @@ header {
 }
 
 #randomize {
-  padding: 0.5em;
   margin: 2em;
+  padding: 0.5em;
   border: 1px black solid;
   border-radius: 0.8em;
 }
@@ -84,6 +84,10 @@ nav a {
   justify-content: center;
   align-items: center;
   text-align: center;
+}
+.row:hover {
+  background-color: #cacaca;
+  cursor: pointer;
 }
 
 footer {
