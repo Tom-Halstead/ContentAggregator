@@ -26,6 +26,10 @@ header {
   z-index: 1000;
 }
 
+.login-register {
+  margin: 1em;
+}
+
 #randomize {
   margin: 2em;
   padding: 0.5em;
@@ -88,6 +92,10 @@ nav a {
 .row:hover {
   background-color: #cacaca;
   cursor: pointer;
+}
+
+.section-title {
+  align-self: center;
 }
 
 footer {
