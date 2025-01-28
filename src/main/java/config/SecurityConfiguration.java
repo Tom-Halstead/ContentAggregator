@@ -6,14 +6,13 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        CognitoLogoutHandler = cognitoLogoutHandler = new CognitoLogoutHandler();
+        CognitoLogoutHandler cognitoLogoutHandler = new CognitoLogoutHandler();
 
         http.csrf().disable().authorizeHttpRequests(authz -> authz.requestMatchers("/").permitAll().anyRequest().authenticated()).oauth2Login(Customizer.withDefaults()).logout(logout -> logout.logoutSuccessHandler(cognitoLogoutHandler));
 
