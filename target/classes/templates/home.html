@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <title>Amazon Cognito Integration</title>
+</head>
+<body>
+<h1>Welcome to Cognito Demo App</h1>
+
+<div sec:authorize="isAuthenticated()">
+    <p>Hello, <span th:text="${#authentication.name}"></span>!</p>
+    <p>OIDC Properties: <span th:text="${#authentication.principal}"></span></p>
+    <a th:href="@{/logout}">Log out</a>
+</div>
+
+<div sec:authorize="isAnonymous()">
+    <a th:href="@{/oauth2/authorization/cognito}">Log in</a>
+</div>
+</body>
+</html>

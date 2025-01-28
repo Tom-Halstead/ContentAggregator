@@ -1,4 +1,4 @@
-package config;
+package com.contentaggregator.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
