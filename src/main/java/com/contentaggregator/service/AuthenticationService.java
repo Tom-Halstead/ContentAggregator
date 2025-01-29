@@ -12,8 +12,11 @@ import java.text.ParseException;
 @Service
 public class AuthenticationService {
 
+    private final CognitoConfig cognitoConfig;
+
     @Autowired
     public AuthenticationService(CognitoConfig cognitoConfig) {
+        this.cognitoConfig = cognitoConfig;
     }
 
     public boolean validateToken(String token) {

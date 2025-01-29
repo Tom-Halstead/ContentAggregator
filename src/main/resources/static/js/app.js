@@ -41,10 +41,7 @@ function openCognitoPopup() {
   }, 1000);
 }
 
-document.getElementById("loginBtn").addEventListener("click", () => {
+document.getElementById("authButton").addEventListener("click", () => {
   console.log("Logged in");
   openCognitoPopup();
-});
-document.getElementById("registerBtn").addEventListener("click", () => {
-  console.log("Registered");
 });
