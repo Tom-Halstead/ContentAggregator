@@ -1,18 +1,16 @@
-document.getElementById("loginBtn").addEventListener("click", () => {
-  console.log("Logged in");
-});
-document.getElementById("registerBtn").addEventListener("click", () => {
-  console.log("Registered");
-});
-
-function openCognitoPopup(action) {
-  const clientId = "5oncoq9mddhbmluooq6kpib2kj";
-  const redirectUri = "";
+function openCognitoPopup() {
   const domain = "https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com";
-  const scope = "";
+  const clientId = "5oncoq9mddhbmluooq6kpib2kj";
+  const redirectUri = encodeURIComponent(
+    "http://localhost:5500/src/main/resources/static/index.html"
+  );
 
-  let authUrl = "";
+  const scope = encodeURIComponent("email openid profile");
+  const authUrl = `${domain}/oauth2/authorize?client_id=${clientId}&response_type=code&scope=${scope}&redirect_uri=${redirectUri}`;
 
+  console.log("Opening Cognito login at:", authUrl); // Debugging
+
+  // Open the Cognito login page
   const authWindow = window.open(
     authUrl,
     "CognitoLogin",
@@ -24,6 +22,7 @@ function openCognitoPopup(action) {
     return;
   }
 
+  // Poll for Cognito redirect
   const interval = setInterval(() => {
     try {
       if (authWindow.location.href.includes("code=")) {
@@ -36,6 +35,16 @@ function openCognitoPopup(action) {
           exchangeAuthCodeForTokens(authCode);
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      // Ignore cross-origin access errors
+    }
   }, 1000);
 }
+
+document.getElementById("loginBtn").addEventListener("click", () => {
+  console.log("Logged in");
+  openCognitoPopup();
+});
+document.getElementById("registerBtn").addEventListener("click", () => {
+  console.log("Registered");
+});
