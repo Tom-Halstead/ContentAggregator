@@ -8,11 +8,12 @@
       rel="stylesheet"
       href="/src/main/resources/static/css/stylesheet.css"
     />
+    <script defer src="/src/main/resources/static/js/app.js"></script>
   </head>
   <body>
     <header>
       <div class="logo">
-        <img src="logo.png" alt="My Logo" />
+        <img src="" alt="My Logo" />
       </div>
       <nav class="main-nav">
         <a href="#">Home</a>
@@ -21,11 +22,13 @@
         <a href="#">Contact</a>
       </nav>
       <nav class="quick-nav">
-        <a href="#">Login</a>
-        <a href="#">Register</a>
+        <button id="loginBtn" class="authButton" type="button">Login</button>
+        <button id="registerBtn" class="authButton" type="button">
+          Register
+        </button>
       </nav>
     </header>
-    <h1 class="login-register">Login or Register to customize your feed!</h1>
+    <h1 class="auth-title">Login or Register to customize your feed!</h1>
     <button id="randomize" type="button">Random Content!</button>
     <div class="container">
       <div class="column">
@@ -37,7 +40,7 @@
         <div class="row">Row 5</div>
       </div>
       <div class="column">
-        <h2 class="section-title">Top News Stories</h2>
+        <h2 class="section-title">Top Local News</h2>
         <div class="row">Row 1</div>
         <div class="row">Row 2</div>
         <div class="row">Row 3</div>
@@ -45,7 +48,7 @@
         <div class="row">Row 5</div>
       </div>
       <div class="column">
-        <h2 class="section-title">Top Trending</h2>
+        <h2 class="section-title">Top World News</h2>
         <div class="row">Row 1</div>
         <div class="row">Row 2</div>
         <div class="row">Row 3</div>

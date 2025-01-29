@@ -26,8 +26,16 @@ header {
   z-index: 1000;
 }
 
-.login-register {
+.auth-title {
   margin: 1em;
+}
+
+.authButton {
+  font-size: 1em;
+  color: white;
+  background: none;
+  border-radius: 20%;
+  padding: 5px;
 }
 
 #randomize {

@@ -11,9 +11,9 @@ import java.nio.charset.StandardCharsets;
 
 public class CognitoLogoutHandler extends SimpleUrlLogoutSuccessHandler {
 
-    private String domain = "https://us-east-2esprl1lnw.auth.us-east-2.amazoncognito.com";
+    private String domain = "https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com";
     private String logoutRedirectUrl = "/index.html";
-    private String userPoolClientId = "4ss9iluj4drs0om2umjukm4lld";
+    private String userPoolClientId = "5oncoq9mddhbmluooq6kpib2kj";
 
     @Override
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
