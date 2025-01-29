@@ -1,7 +1,9 @@
 document.getElementById("loginBtn").addEventListener("click", () => {
   console.log("Logged in");
 });
-document.getElementById("registerBtn").addEventListener("click", () => {});
+document.getElementById("registerBtn").addEventListener("click", () => {
+  console.log("Registered");
+});
 
 function openCognitoPopup(action) {
   const clientId = "5oncoq9mddhbmluooq6kpib2kj";
