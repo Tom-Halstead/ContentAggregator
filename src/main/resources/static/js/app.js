@@ -1,3 +1,9 @@
+"use strict";
+/////////////////////
+////////////////////
+////////////////////
+///////////////////
+
 function openCognitoPopup() {
   const domain = "https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com";
   const clientId = "5oncoq9mddhbmluooq6kpib2kj";
@@ -28,7 +34,7 @@ function openCognitoPopup() {
       if (authWindow.location.href.includes("code=")) {
         const urlParams = new URLSearchParams(authWindow.location.search);
         const authCode = urlParams.get("code");
-
+        console.log(authCode);
         if (authCode) {
           authWindow.close();
           clearInterval(interval);
@@ -40,6 +46,24 @@ function openCognitoPopup() {
     }
   }, 1000);
 }
+
+window.onload = function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get("code");
+
+  if (code) {
+    fetch("/auth/login", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${code}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => console.log("Token:", data))
+      .catch((error) => console.error("Error", error));
+  }
+};
 
 document.getElementById("authButton").addEventListener("click", () => {
   console.log("Logged in");

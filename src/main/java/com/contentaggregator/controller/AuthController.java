@@ -2,7 +2,6 @@ package com.contentaggregator.controller;
 
 import com.contentaggregator.response.AuthResponse;
 import com.contentaggregator.service.AuthService;
-import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
-public class AuthenticationController {
+public class AuthController {
 
     @Autowired
     private AuthService authService;
