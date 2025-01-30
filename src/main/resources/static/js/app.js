@@ -44,9 +44,11 @@ window.onload = function () {
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get("code");
   const authBtn = document.getElementById("authButton");
+  const authTitle = document.getElementById("auth-title");
 
   if (code) {
     authBtn.classList.add("hidden");
+    authTitle.classList.add("hidden");
   }
 };
 
