@@ -15,6 +15,9 @@ public class CognitoConfig {
     @Value("${spring.security.oauth2.client.provider.cognito.issuer-uri}")
     private String issuerUrl;
 
+    @Value("${spring.security.oauth2.client.registration.cognito.redirect-uri}")
+    private String redirectUri;
+
     public String getClientId() {
         return clientId;
     }
@@ -25,5 +28,13 @@ public class CognitoConfig {
 
     public String getIssuerUrl() {
         return issuerUrl;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public String getTokenEndpoint() {
+        return this.issuerUrl + "/oauth2/token";
     }
 }

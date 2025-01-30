@@ -1,24 +1,50 @@
 package com.contentaggregator.service;
 
 import com.contentaggregator.config.CognitoConfig;
+import com.contentaggregator.response.AuthResponse;
+import com.contentaggregator.response.JwtTokenResponse;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
 
 @Service
-public class AuthenticationService {
+public class AuthService {
 
     private final CognitoConfig cognitoConfig;
 
     @Autowired
-    public AuthenticationService(CognitoConfig cognitoConfig) {
+    public AuthService(CognitoConfig cognitoConfig) {
         this.cognitoConfig = cognitoConfig;
     }
 
+    public AuthResponse exchangeCodeForToken(String code) throws Exception
+    {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("grant_type", "authorization_code");
+        map.add("client_id", cognitoConfig.getClientId());
+        map.add("redirect_uri", cognitoConfig.getRedirectUri());
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
+
+        ResponseEntity<JwtTokenResponse> response = restTemplate.exchange(cognitoConfig.getTokenEndpoint(), HttpMethod.POST, entity, JwtTokenResponse.class);
+
+        JwtTokenResponse tokenResponse = response.getBody();
+        return new AuthResponse(tokenResponse.getIdToken(), tokenResponse.getAccessToken());
+    };
     public boolean validateToken(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);

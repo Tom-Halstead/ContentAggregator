@@ -1,16 +1,17 @@
 :root {
   --gap: 20px;
   --padding: 10px;
-  --color-start: #4a73c0;
-  --color-mid: #63a3e8;
-  --color-end: #5a9fe4;
-  --color-end-light: #b0d7f6;
+  --color-start: #6683c4;
+  --color-mid: #91b9f0;
+  --color-end: #6ea3e0;
+  --color-end-light: #d1e7fa;
   --mask-opacity-start: 85%;
   --mask-opacity-end: 100%;
 }
 
+/* Can't figure out why my background gradient isn't going the whole way, so cheating it for now. */
 html {
-  background: linear-gradient(to bottom, #ccd8ee 0%, #e0e0e0 100%);
+  background: linear-gradient(to bottom, #e0e0e0, #ffffff);
 }
 
 body {
@@ -18,21 +19,20 @@ body {
   margin: 0;
   font-family: "Courier New", Courier, monospace;
   height: 100vh;
-  min-width: 320px;
   justify-items: center;
-  /* background: linear-gradient(to bottom, #ccd8ee 0%, #e0e0e0 100%); */
+  background: linear-gradient(to bottom, #ccd8ee 0%, #e0e0e0 100%);
   overflow-x: hidden;
 }
 
 header {
   height: 3em;
   display: flex;
+  position: sticky;
   justify-content: space-between;
   align-items: center;
   --gradient-direction: to bottom;
   color: white;
   padding: 10px 5%;
-  position: sticky;
   width: 100%;
   top: 0;
   z-index: 1000;
@@ -117,10 +117,6 @@ header {
   animation: slidebg 5s linear infinite;
 }
 
-.logo img {
-  width: 50px; /* Adjust the size of your logo */
-}
-
 .main-nav {
   display: flex;
   gap: 20px;
@@ -134,7 +130,10 @@ header {
 }
 
 nav a {
-  color: white;
+  color: rgb(255, 255, 255);
+  font-size: 18px;
+  font-weight: bolder;
+  letter-spacing: 0.08em;
   text-decoration: none;
 }
 
@@ -181,7 +180,7 @@ nav a {
 footer {
   position: sticky;
   /* position: fixed; */
-  bottom: 0;
+  /* bottom: 0; */
   width: 100%;
   --gradient-direction: to top;
   color: white;
