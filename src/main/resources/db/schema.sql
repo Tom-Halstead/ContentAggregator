@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS users, news_sources, user_news_sources;
 -- Create the users table
 CREATE TABLE users (
     user_id VARCHAR(255) PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP WITH TIME ZONE,

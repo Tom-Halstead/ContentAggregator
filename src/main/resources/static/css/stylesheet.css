@@ -1,6 +1,16 @@
 :root {
   --gap: 20px;
   --padding: 10px;
+  --color-start: #4a73c0;
+  --color-mid: #63a3e8;
+  --color-end: #5a9fe4;
+  --color-end-light: #b0d7f6;
+  --mask-opacity-start: 85%;
+  --mask-opacity-end: 100%;
+}
+
+html {
+  background: linear-gradient(to bottom, #ccd8ee 0%, #e0e0e0 100%);
 }
 
 body {
@@ -8,8 +18,10 @@ body {
   margin: 0;
   font-family: "Courier New", Courier, monospace;
   height: 100vh;
+  min-width: 320px;
   justify-items: center;
-  background-color: #f4f4f4;
+  /* background: linear-gradient(to bottom, #ccd8ee 0%, #e0e0e0 100%); */
+  overflow-x: hidden;
 }
 
 header {
@@ -17,13 +29,36 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #333;
+  --gradient-direction: to bottom;
   color: white;
   padding: 10px 5%;
   position: sticky;
-  width: 90%;
+  width: 100%;
   top: 0;
   z-index: 1000;
+}
+
+.shared-gradient {
+  background: linear-gradient(
+    var(--gradient-direction, to bottom),
+    var(--color-start) 14%,
+    var(--color-mid) 35%,
+    var(--color-end) 100%,
+    var(--color-end-light) 100%
+  );
+}
+
+.shared-mask {
+  -webkit-mask-image: linear-gradient(
+    var(--gradient-direction, to bottom),
+    rgba(0, 0, 0, 1) var(--mask-opacity-start),
+    rgba(0, 0, 0, 0) var(--mask-opacity-end)
+  );
+  mask-image: linear-gradient(
+    var(--gradient-direction, to bottom),
+    rgba(0, 0, 0, 1) var(--mask-opacity-start),
+    rgba(0, 0, 0, 0) var(--mask-opacity-end)
+  );
 }
 
 .auth-title {
@@ -44,6 +79,7 @@ header {
   color: #ffffff;
   font-size: 1em;
   padding: 8px 15px 8px 15px;
+  margin: 15px;
   text-decoration: none;
 }
 
@@ -144,13 +180,13 @@ nav a {
 
 footer {
   position: sticky;
+  /* position: fixed; */
   bottom: 0;
   width: 100%;
-  background-color: #333;
+  --gradient-direction: to top;
   color: white;
   text-align: center;
   padding: 10px 0;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes slidebg {
