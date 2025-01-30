@@ -186,6 +186,10 @@ footer {
   align-content: center;
 }
 
+.hidden {
+  display: none;
+}
+
 @keyframes slidebg {
   to {
     background-position: 20vw;
