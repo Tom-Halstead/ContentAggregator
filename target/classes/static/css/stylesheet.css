@@ -12,12 +12,12 @@
 /* Can't figure out why my background gradient isn't going the whole way, so cheating it for now. */
 html {
   background: linear-gradient(to bottom, #e0e0e0, #ffffff);
+  height: 100%;
 }
 
 body {
   font-family: "Courier New", Courier, monospace;
-  height: 100vh;
-  /* height: 100%; */
+  height: 100%;
   margin: 0;
   padding: 0;
   justify-items: center;
@@ -29,13 +29,15 @@ body {
 }
 
 header {
-  height: 6em;
+  min-height: 4em;
+  height: 5em;
   display: flex;
-  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  flex-wrap: wrap;
   align-items: center;
   --gradient-direction: to bottom;
   color: white;
-  /* padding: 10px 5%; */
   z-index: 1000;
   width: 100%;
 }
@@ -70,14 +72,15 @@ header {
   background-image: -ms-linear-gradient(top, #3498db, #2980b9);
   background-image: -o-linear-gradient(top, #3498db, #2980b9);
   background-image: linear-gradient(to bottom, #3498db, #2980b9);
-  -webkit-border-radius: 56;
-  -moz-border-radius: 56;
-  border-radius: 56px;
+  -webkit-border-radius: 50;
+  -moz-border-radius: 50;
+  border-radius: 50px;
+  margin-right: 4em;
+  height: 2em;
   font-family: Courier New;
   color: #ffffff;
   font-size: 1em;
   /* padding: 8px 10px 8px 10px; */
-  margin: 15px;
   text-decoration: none;
 }
 
@@ -124,9 +127,9 @@ header {
 }
 
 .quick-nav {
-  display: flex;
+  /* display: flex; */
   /* gap: 2em; */
-  height: 4em;
+  /* height: 4em; */
 }
 
 nav a {
@@ -178,12 +181,16 @@ nav a {
 }
 
 footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   --gradient-direction: to top;
   color: white;
-  text-align: center;
-  height: 5.5em;
-  align-content: center;
+  min-height: 4em;
+  height: 5em;
+  position: sticky;
+  bottom: 0;
 }
 
 .hidden {
@@ -216,5 +223,22 @@ footer {
 
   .column {
     width: 90%;
+  }
+}
+
+@media (max-width: 320px) {
+  header {
+  }
+
+  .container {
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
   }
 }
