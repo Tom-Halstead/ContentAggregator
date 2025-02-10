@@ -33,15 +33,17 @@ public class AuthController {
 
     @GetMapping("/redirect-to-cognito")
     public String redirectToCognito() {
-        String authUrl = UriComponentsBuilder
+        return "redirect:" + buildCognitoUrl();
+    }
+
+    private String buildCognitoUrl() {
+        return UriComponentsBuilder
                 .fromUriString(cognitoConfig.getDomain() + "/oauth2/authorize")
                 .queryParam("response_type", "code")
                 .queryParam("client_id", cognitoConfig.getClientId())
                 .queryParam("scope", cognitoConfig.getScope())
                 .queryParam("redirect_uri", cognitoConfig.getRedirectUri())
                 .toUriString();
-
-        return "redirect:" + authUrl;
     }
 
     @PostMapping("/login")
@@ -92,16 +94,22 @@ public class AuthController {
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<?> exchangeCodeForTokens(@RequestParam String code) {
+    public ResponseEntity<?> handleCallback(@RequestParam Map<String, String> params) {
+        if (params.containsKey("error")) {
+            // Log the error or inform the user
+            return ResponseEntity.badRequest().body("Error during OAuth2 callback: " + params.get("error_description"));
+        }
+
         try {
-            AuthResponse authResponse = authService.exchangeCodeForToken(code);
-            // Process tokens as needed, maybe setting cookies or a redirect
+            AuthResponse authResponse = authService.exchangeCodeForToken(params.get("code"));
+            // Process tokens, set cookies, etc.
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Set-Cookie", "token=" + authResponse.getAccessToken() + "; HttpOnly; Path=/");
+            headers.add("Set-Cookie", "access_token=" + authResponse.getAccessToken() + "; HttpOnly; Path=/");
             return ResponseEntity.ok().headers(headers).body(authResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to exchange code for tokens: " + e.getMessage());
         }
     }
+
 
 }

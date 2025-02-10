@@ -21,8 +21,7 @@ public class CognitoConfig {
     @Value("${aws.cognito.domain}")
     private String domain;
 
-    @Value("${aws.cognito.scope}")
-    private String scope;
+    private String scope = "email openid";
 
     public String getClientId() {
         return clientId;

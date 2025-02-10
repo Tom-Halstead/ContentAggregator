@@ -140,7 +140,7 @@ nav a {
   text-decoration: none;
 }
 
-.container {
+article {
   margin: 1em;
   justify-self: center;
   display: flex;
@@ -204,7 +204,7 @@ footer {
 }
 
 @media (max-width: 768px) {
-  .container {
+  article {
     flex-direction: column;
     align-items: center;
     height: 100%;
@@ -230,7 +230,7 @@ footer {
   header {
   }
 
-  .container {
+  article {
     flex-direction: column;
     align-items: center;
     height: 100%;

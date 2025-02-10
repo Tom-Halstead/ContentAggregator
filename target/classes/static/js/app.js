@@ -4,21 +4,27 @@ class AuthManager {
   constructor() {
     this.authBtn = document.getElementById("authButton");
     this.initEventListeners();
+    this.processAuthorizationCode(); // Ensure it's called once the DOM is fully loaded and AuthManager is instantiated
+  }
+
+  // Initialize event listeners
+  initEventListeners() {
+    this.authBtn.addEventListener("click", () => {
+      if (localStorage.getItem("access_token")) {
+        this.logout();
+      } else {
+        this.redirectToCognito();
+      }
+    });
   }
 
   // Redirects directly to Cognito's login page
   redirectToCognito() {
-    window.location.href = "/auth/redirect-to-cognito";
+    window.location.href = "http://localhost:8080/auth/redirect-to-cognito";
+    // window.location.href = "/auth/redirect-to-cognito";
   }
 
-  initEventListeners() {
-    document.addEventListener("DOMContentLoaded", () => {
-      const authManager = new AuthManager();
-      this.processAuthorizationCode();
-    });
-  }
-
-  // Handles redirection based on the presence of an authorization code
+  // Handles the presence of an authorization code in the URL
   processAuthorizationCode() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
@@ -37,16 +43,8 @@ class AuthManager {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(
-            `HTTP status ${response.status}: ${response.statusText}`
-          );
-        }
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((data) => {
-        console.log("Token exchange successful.");
         localStorage.setItem("access_token", data.access_token);
         this.updateUI(true);
       })
@@ -58,10 +56,7 @@ class AuthManager {
 
   // Updates the UI based on authentication status
   updateUI(isLoggedIn) {
-    this.authBtn.innerText = isLoggedIn ? "Logout" : "Login";
-    this.authBtn.onclick = isLoggedIn
-      ? this.logout.bind(this)
-      : this.redirectToCognito.bind(this);
+    this.authBtn.innerText = isLoggedIn ? "Logout" : "Login/Register";
   }
 
   // Handles user logout
@@ -80,7 +75,8 @@ class AuthManager {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  authManager.processAuthorizationCode();
+  new AuthManager();
+  new ContentManager();
 });
 
 // class ProfileManager {
@@ -127,3 +123,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // authManager.updateUI(!!localStorage.getItem("access_token"));
 // });
+
+class ContentManager {
+  constructor() {
+    const article = document.getElementById("article");
+    article.addEventListener("click", (ev) => {
+      console.log(ev.target, ev.currentTarget);
+      console.log(article.q);
+    });
+  }
+}
