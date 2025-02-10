@@ -18,11 +18,17 @@ public class CognitoConfig {
     @Value("${spring.security.oauth2.client.registration.cognito.redirect-uri}")
     private String redirectUri;
 
+    @Value("${aws.cognito.domain}")
+    private String domain;
+
+    @Value("${aws.cognito.scope}")
+    private String scope;
+
     public String getClientId() {
         return clientId;
     }
 
-    public String getSecretKey() {
+    public String getClientSecret() {
         return secretKey;
     }
 
@@ -32,6 +38,23 @@ public class CognitoConfig {
 
     public String getRedirectUri() {
         return redirectUri;
+    }
+
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     public String getTokenEndpoint() {

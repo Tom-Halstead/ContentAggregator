@@ -20,31 +20,41 @@ import java.text.ParseException;
 @Service
 public class AuthService {
 
+    private final RestTemplate restTemplate;
     private final CognitoConfig cognitoConfig;
 
     @Autowired
-    public AuthService(CognitoConfig cognitoConfig) {
+    public AuthService(RestTemplate restTemplate, CognitoConfig cognitoConfig) {
+        this.restTemplate = restTemplate;
         this.cognitoConfig = cognitoConfig;
     }
 
-    public AuthResponse exchangeCodeForToken(String code) throws Exception
-    {
-        RestTemplate restTemplate = new RestTemplate();
+    public AuthResponse exchangeCodeForToken(String code) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("grant_type", "authorization_code");
-        map.add("client_id", cognitoConfig.getClientId());
-        map.add("redirect_uri", cognitoConfig.getRedirectUri());
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", cognitoConfig.getClientId());
+        params.add("code", code);
+        params.add("redirect_uri", cognitoConfig.getRedirectUri());
+        params.add("client_secret", cognitoConfig.getClientSecret());  // Ensure this is securely managed
 
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        ResponseEntity<JwtTokenResponse> response = restTemplate.postForEntity(
+                cognitoConfig.getTokenEndpoint(),
+                request,
+                JwtTokenResponse.class
+        );
 
-        ResponseEntity<JwtTokenResponse> response = restTemplate.exchange(cognitoConfig.getTokenEndpoint(), HttpMethod.POST, entity, JwtTokenResponse.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JwtTokenResponse tokenResponse = response.getBody();
+            return new AuthResponse(tokenResponse.getIdToken(), tokenResponse.getAccessToken());
+        } else {
+            throw new Exception("Failed to exchange code for tokens. Status: " + response.getStatusCode());
+        }
+    }
 
-        JwtTokenResponse tokenResponse = response.getBody();
-        return new AuthResponse(tokenResponse.getIdToken(), tokenResponse.getAccessToken());
-    };
     public boolean validateToken(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
