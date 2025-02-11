@@ -4,7 +4,7 @@ class AuthManager {
   constructor() {
     this.authBtn = document.getElementById("authButton");
     this.initEventListeners();
-    this.processAuthorizationCode(); // Ensure it's called once the DOM is fully loaded and AuthManager is instantiated
+    this.checkLoginStatus();
   }
 
   // Initialize event listeners
@@ -18,38 +18,29 @@ class AuthManager {
     });
   }
 
-  // Redirects directly to Cognito's login page
+  // Redirects user directly to Cognito login via Spring Security
   redirectToCognito() {
-    window.location.href = "http://localhost:8080/auth/redirect-to-cognito";
-    // window.location.href = "/auth/redirect-to-cognito";
+    window.location.href = "http://localhost:8080/oauth2/authorization/cognito";
   }
 
-  // Handles the presence of an authorization code in the URL
-  processAuthorizationCode() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
-
-    if (code) {
-      this.sendCodeToServer(code);
-    } else {
-      this.updateUI(!!localStorage.getItem("access_token"));
-    }
-  }
-
-  // Sends the authorization code to the backend for token exchange
-  sendCodeToServer(code) {
-    fetch(`http://localhost:8080/auth/exchange`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
+  // Checks if user is logged in
+  checkLoginStatus() {
+    fetch("http://localhost:8080/user-info", {
+      method: "GET",
+      credentials: "include", // Ensures cookies (session) are sent
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) throw new Error("User not authenticated");
+        return response.json();
+      })
       .then((data) => {
-        localStorage.setItem("access_token", data.access_token);
+        console.log("User Info:", data);
+        localStorage.setItem("access_token", "session"); // Store as a dummy value
         this.updateUI(true);
       })
       .catch((error) => {
-        console.error("Error during token exchange:", error);
+        console.error("Not logged in:", error);
+        localStorage.removeItem("access_token");
         this.updateUI(false);
       });
   }
@@ -61,19 +52,12 @@ class AuthManager {
 
   // Handles user logout
   logout() {
-    fetch("http://localhost:8080/auth/logout", { method: "POST" })
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to log out.");
-        localStorage.removeItem("access_token");
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.error("Logout failed:", error);
-        alert("Logout failed, please try again!");
-      });
+    localStorage.removeItem("access_token"); // Clear token
+    window.location.href = "http://localhost:8080/logout"; // Redirect to Cognito logout
   }
 }
 
+// Wait for DOM to load
 document.addEventListener("DOMContentLoaded", () => {
   new AuthManager();
   new ContentManager();

@@ -83,15 +83,16 @@ public class AuthController {
     }
 
     @PostMapping("/exchange")
-    public ResponseEntity<?> exchangeCodeForTokens(@RequestBody Map<String, String> payload) {
-        String code = payload.get("code");
+    public ResponseEntity<AuthResponse> exchangeCodeForTokens(@RequestBody AuthRequest authRequest) {
+        String code = authRequest.getCode(); // Extract code from the DTO
         try {
             AuthResponse authResponse = authService.exchangeCodeForToken(code);
             return ResponseEntity.ok(authResponse);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to exchange code for tokens: " + e.getMessage());
+            return ResponseEntity.badRequest().body(new AuthResponse(null, "Failed to exchange code: " + e.getMessage()));
         }
     }
+
 
     @GetMapping("/callback")
     public ResponseEntity<?> handleCallback(@RequestParam Map<String, String> params) {
