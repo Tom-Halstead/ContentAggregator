@@ -3,6 +3,7 @@
 class AuthManager {
   constructor() {
     this.authBtn = document.getElementById("authButton");
+    this.authTitle = document.getElementById("auth-title");
     this.initEventListeners();
     this.checkLoginStatus();
   }
@@ -10,7 +11,7 @@ class AuthManager {
   // Initialize event listeners
   initEventListeners() {
     this.authBtn.addEventListener("click", () => {
-      if (localStorage.getItem("access_token")) {
+      if (sessionStorage.getItem("access_token")) {
         this.logout();
       } else {
         this.redirectToCognito();
@@ -18,7 +19,7 @@ class AuthManager {
     });
   }
 
-  // Redirects user directly to Cognito login via Spring Security
+  // Redirects user to Cognito login via Spring Security
   redirectToCognito() {
     window.location.href = "http://localhost:8080/oauth2/authorization/cognito";
   }
@@ -27,33 +28,39 @@ class AuthManager {
   checkLoginStatus() {
     fetch("http://localhost:8080/user-info", {
       method: "GET",
-      credentials: "include", // Ensures cookies (session) are sent
+      credentials: "include", // ✅ Ensures session cookies are included
     })
       .then((response) => {
-        if (!response.ok) throw new Error("User not authenticated");
+        if (response.status === 401) throw new Error("User not authenticated"); // ✅ Prevents crashing
         return response.json();
       })
-      .then((data) => {
-        console.log("User Info:", data);
-        localStorage.setItem("access_token", "session"); // Store as a dummy value
-        this.updateUI(true);
+      .then((user) => {
+        console.log("User Info:", user);
+        sessionStorage.setItem("access_token", "session"); // ✅ Dummy session token
+
+        this.updateUI(true, user);
       })
       .catch((error) => {
         console.error("Not logged in:", error);
-        localStorage.removeItem("access_token");
+        sessionStorage.removeItem("access_token");
         this.updateUI(false);
       });
   }
 
   // Updates the UI based on authentication status
-  updateUI(isLoggedIn) {
+  updateUI(isLoggedIn, user = null) {
     this.authBtn.innerText = isLoggedIn ? "Logout" : "Login/Register";
+    if (user) {
+      this.authTitle.innerText = `Hello, ${user.email || "Guest"}`;
+    } else {
+      this.authTitle.innerText = "Welcome, Guest";
+    }
   }
 
   // Handles user logout
   logout() {
-    localStorage.removeItem("access_token"); // Clear token
-    window.location.href = "http://localhost:8080/logout"; // Redirect to Cognito logout
+    sessionStorage.removeItem("access_token"); // ✅ Clears session storage
+    window.location.href = "http://localhost:8080/logout"; // ✅ Redirects to backend logout
   }
 }
 

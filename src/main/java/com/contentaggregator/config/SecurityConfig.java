@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -18,43 +20,55 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf().disable()
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight requests
-                        .requestMatchers("/", "/login").permitAll() // Allow homepage & login page
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight CORS requests
+                        .requestMatchers("/", "/index.html", "/user-info").permitAll() // Public routes
                         .anyRequest().authenticated() // Protect all other endpoints
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("/", true) // Redirect to homepage after login
-                        .failureUrl("/login?error=true") // Redirect to error page if login fails
+                        .defaultSuccessUrl("http://127.0.0.1:5500/src/main/resources/static/index.html", true) // ✅ Redirects to frontend after login
+                        .failureUrl("http://127.0.0.1:5500/index.html?error=true") // Redirect on failure
                 )
                 .logout(logout -> logout
-                        .logoutSuccessHandler(new CognitoLogoutHandler()) // Handle Cognito logout
-                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("http://127.0.0.1:5500/src/main/resources/static/index.html") // ✅ Redirects to frontend after logout
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
                 )
-
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Enables session storage for OAuth2
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // ✅ Ensures session-based authentication
                 );
 
         return http.build();
     }
 
+    // ✅ Allows semicolons in URLs to prevent request rejection
+    @Bean
+    public HttpFirewall allowSemicolonHttpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowSemicolon(true);
+        return firewall;
+    }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080", "http://127.0.0.1:5500")); // Allow frontend
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:8080",
+                "http://127.0.0.1:8080",
+                "http://127.0.0.1:5500"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-        configuration.setAllowCredentials(true); // Important for cookies/session
+        configuration.setExposedHeaders(Arrays.asList("Authorization")); // Exposes Auth headers to frontend
+        configuration.setAllowCredentials(true); // ✅ Allows session cookies
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }
