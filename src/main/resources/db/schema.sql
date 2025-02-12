@@ -1,10 +1,10 @@
 -- Drop existing tables if they exist already
-DROP TABLE IF EXISTS users, news_sources, user_news_sources;
+DROP TABLE IF EXISTS user, news_sources, user_news_sources;
 
 
 -- Create the users table
-CREATE TABLE users (
-    user_id VARCHAR(255) PRIMARY KEY,
+CREATE TABLE "user" (
+    user_id INT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -13,7 +13,7 @@ CREATE TABLE users (
 );
 
 -- Create the news_sources table
-CREATE TABLE news_sources (
+CREATE TABLE news_source (
     news_source_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     api_type VARCHAR(100),  -- Type of API like 'Reddit', 'LocalNewsAPI', etc.
@@ -22,8 +22,8 @@ CREATE TABLE news_sources (
 );
 
 -- Create the user_news_sources table
-CREATE TABLE user_news_sources (
-    user_id VARCHAR(255) NOT NULL,
+CREATE TABLE user_news_source (
+    user_id INT NOT NULL,
     news_source_id INT NOT NULL,
     custom_parameters JSONB, -- Storing JSON data for API-specific parameters
     added_on TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
