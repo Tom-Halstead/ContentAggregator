@@ -14,50 +14,48 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-
-        @Bean
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf().disable()
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight CORS requests
-                        .requestMatchers("/", "/index.html", "/user-info").permitAll() // Public routes
+                        .requestMatchers("/", "/index.html", "/post-login").permitAll() // Allow post-login redirection
                         .anyRequest().authenticated() // Protect all other endpoints
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("http://127.0.0.1:5500/src/main/resources/static/index.html", true) // ✅ Redirects to frontend after login
-                        .failureUrl("http://127.0.0.1:5500/index.html?error=true") // Redirect on failure
+                        .defaultSuccessUrl("/post-login", true) // ✅ Redirects to post-login handler
+                        .failureUrl("/login-failed") // Redirect if login fails
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("http://127.0.0.1:5500/src/main/resources/static/index.html") // ✅ Redirects to frontend after logout
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "access_token")
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // ✅ Ensures session-based authentication
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwtConfigurer -> jwtConfigurer
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()) // ✅ Validate JWT
+                        )
                 );
 
         return http.build();
     }
 
-    // Optional: Customize JWT Authentication Converter
-    private JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        // You can customize claims here (for example, extract roles or other details)
-        return converter;
-    }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:5500", "http://127.0.0.1:8080")); // Add frontend domain(s)
+        corsConfig.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:8080"
+        )); // Add frontend domains
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         corsConfig.setAllowCredentials(true);
@@ -66,5 +64,9 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", corsConfig);  // Apply CORS globally
         return source;
     }
-}
 
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        return new JwtAuthenticationConverter();
+    }
+}

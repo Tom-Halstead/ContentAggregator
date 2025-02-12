@@ -23,49 +23,20 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> getUserInfo(Authentication authentication) {
         if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Authentication object cannot be null"));
+            return ResponseEntity.status(401).body(Map.of("error", "User is not authenticated"));
         }
 
-        try {
-            Map<String, Object> response = new HashMap<>();
+        if (authentication instanceof OAuth2AuthenticationToken oauth2Auth) {
+            OidcUser oidcUser = (OidcUser) oauth2Auth.getPrincipal();
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("username", oidcUser.getAttribute("cognito:username"));
+            userInfo.put("email", oidcUser.getAttribute("email"));
+            userInfo.put("cognito_uuid", oidcUser.getAttribute("sub"));
 
-            // ✅ Case 1: Authenticated User (OAuth2)
-            if (authentication instanceof OAuth2AuthenticationToken oauth2Auth) {
-                OidcUser oidcUser = (OidcUser) oauth2Auth.getPrincipal();
-
-                if (oidcUser == null) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "OAuth2 principal is null"));
-                }
-
-                // Extract useful attributes
-                response.put("username", oidcUser.getAttribute("cognito:username"));
-                response.put("email", oidcUser.getAttribute("email"));
-                response.put("cognito_uuid", oidcUser.getAttribute("sub")); // Cognito unique user ID
-
-                // ✅ Extract the JWT token from authentication context
-                String accessToken = oidcUser.getIdToken().getTokenValue();
-                response.put("access_token", accessToken); // ✅ Send JWT back to frontend
-
-                return ResponseEntity.ok(response);
-            }
-
-            // ❌ Case 2: Anonymous Authentication (User not logged in)
-            if (authentication instanceof AnonymousAuthenticationToken) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "User is not authenticated"));
-            }
-
-            // ❌ Case 3: Unsupported Authentication Type
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Unsupported authentication type: " + authentication.getClass().getName()));
-
-        } catch (Exception e) {
-            // Log and return error response
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Error retrieving user info", "details", e.getMessage()));
+            return ResponseEntity.ok(userInfo);
         }
+
+        return ResponseEntity.status(400).body(Map.of("error", "Invalid authentication type"));
     }
 
 

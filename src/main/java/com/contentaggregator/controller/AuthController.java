@@ -10,12 +10,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.naming.AuthenticationException;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -30,29 +35,23 @@ public class AuthController {
     @Autowired
     private CognitoConfig cognitoConfig;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest, HttpServletResponse response) {
-        String code = authRequest.getCode();
-        if (code == null || code.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Authorization code is required.");
+    @GetMapping("/post-login")
+    public ResponseEntity<Map<String, Object>> postLogin(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "User is not authenticated"));
         }
 
-        try {
-            AuthResponse authResponse = authService.exchangeCodeForToken(code);
-            // Setting HttpOnly cookie for token
-            Cookie cookie = new Cookie("access_token", authResponse.getAccessToken());
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true); // Ensure the cookie is sent only over HTTPS
-            cookie.setPath("/");
-            response.addCookie(cookie);
-            return ResponseEntity.ok().body("Logged in successfully.");
-        } catch (InvalidCodeException ice) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ice.getMessage());
-        } catch (AuthenticationException ae) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error.");
-        }
+        OAuth2AuthenticationToken oauth2Auth = (OAuth2AuthenticationToken) authentication;
+        OidcUser oidcUser = (OidcUser) oauth2Auth.getPrincipal();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("username", oidcUser.getAttribute("cognito:username"));
+        response.put("email", oidcUser.getAttribute("email"));
+        response.put("cognito_uuid", oidcUser.getAttribute("sub"));
+        response.put("access_token", oidcUser.getIdToken().getTokenValue());
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
