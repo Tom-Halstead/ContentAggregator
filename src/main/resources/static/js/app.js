@@ -161,8 +161,13 @@ class AuthManager {
     console.log("Logging out...");
     this.clearSession();
 
-    window.location.href =
-      "https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com/logout?client_id=5oncoq9mddhbmluooq6kpib2kj&logout_uri=http://127.0.0.1:5500/index.html";
+    // ✅ Use "localhost" instead of "127.0.0.1"
+    const logoutUrl = `https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com/logout?client_id=5oncoq9mddhbmluooq6kpib2kj&logout_uri=${encodeURIComponent(
+      "http://localhost:5500/src/main/resources/static/index.html"
+    )}`;
+
+    console.log("Redirecting to:", logoutUrl);
+    window.location.href = logoutUrl;
   }
 
   /**
