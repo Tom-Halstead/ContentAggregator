@@ -6,15 +6,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class UserService {
 
-    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public User getUserInfoByCognitoUuid(String cognitoUuid) {
         return userRepository.findByCognitoUuid(cognitoUuid).orElseThrow(()-> new RuntimeException("User not found"));
+    }
+
+    public User saveOrUpdateUser(String username, String email, String cognitoUuid) {
+        Optional<User> existingUser = userRepository.findByCognitoUuid(cognitoUuid);
+
+        if (existingUser.isPresent()) {
+            // ✅ User exists, update lastLogin
+            User user = existingUser.get();
+            user.setLastLogin(LocalDateTime.now());
+            return userRepository.save(user);
+        } else {
+            // ✅ New user, save to DB
+            User newUser = new User(username, email, cognitoUuid);
+            return userRepository.save(newUser);
+        }
     }
 
     public User updateLastLogin(String cognitoUuid) {
@@ -22,4 +42,10 @@ public class UserService {
         user.setLastLogin(LocalDateTime.now());
         return userRepository.save(user);
     }
+
+
+    public Optional<User> getUserByCognitoUuid(String cognitoUuid) {
+        return userRepository.findByCognitoUuid(cognitoUuid);
+    }
+
 }

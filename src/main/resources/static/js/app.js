@@ -109,7 +109,7 @@ class AuthManager {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/user-info", {
+      const response = await fetch("http://localhost:8080/api/auth/user-info", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
