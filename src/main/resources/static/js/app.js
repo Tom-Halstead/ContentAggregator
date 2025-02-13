@@ -3,9 +3,12 @@ class AuthManager {
     this.authBtn = document.getElementById("authButton");
     this.authTitle = document.getElementById("auth-title");
     this.initEventListeners();
-    this.checkLoginStatus();
+    this.loadUserData();
   }
 
+  /**
+   * Initializes event listeners for authentication button.
+   */
   initEventListeners() {
     this.authBtn.addEventListener("click", () => {
       if (this.isAuthenticated()) {
@@ -16,52 +19,80 @@ class AuthManager {
     });
   }
 
+  /**
+   * Redirects the user to the Cognito authentication page.
+   */
   redirectToCognito() {
     window.location.href = "http://localhost:8080/oauth2/authorization/cognito";
   }
 
+  /**
+   * Checks if the user is authenticated by looking for the access token cookie.
+   * @returns {boolean} True if authenticated, otherwise false.
+   */
   isAuthenticated() {
-    return document.cookie.includes("access_token=");
+    return this.getCookie("access_token") !== null;
   }
 
-  checkLoginStatus() {
+  /**
+   * Loads user data from cookies and updates the UI.
+   */
+  loadUserData() {
     if (!this.isAuthenticated()) {
       console.error("User is not logged in.");
       this.updateUI(false);
       return;
     }
 
-    fetch("http://localhost:8080/user-info", {
-      method: "GET",
-      credentials: "include", // Ensures cookies are included
-    })
-      .then((response) => {
-        if (response.status === 401) {
-          throw new Error("User not authenticated");
-        }
-        return response.json();
-      })
-      .then((user) => {
-        console.log("User Info:", user);
-        this.updateUI(true, user);
-      })
-      .catch((error) => {
-        console.error("Not logged in:", error);
-        this.updateUI(false);
-      });
+    const username = this.getCookie("username") || "User";
+    const email = this.getCookie("email");
+
+    console.log("User Info:", { username, email });
+    this.updateUI(true, { username, email });
   }
 
+  /**
+   * Updates the UI based on the user's login status.
+   * @param {boolean} isLoggedIn - Whether the user is logged in.
+   * @param {Object|null} user - User information containing username and email.
+   */
   updateUI(isLoggedIn, user = null) {
     this.authBtn.innerText = isLoggedIn ? "Logout" : "Login/Register";
     this.authTitle.innerText = isLoggedIn
-      ? `Hello, ${user?.username || "User"}`
+      ? `Hello, ${user?.username || "User"}!`
       : "Welcome!";
   }
 
+  /**
+   * Logs the user out by clearing authentication cookies and redirecting to Cognito logout.
+   */
   logout() {
-    document.cookie = "access_token=; Max-Age=0; path=/"; // Delete token
+    this.clearCookie("access_token");
+    this.clearCookie("username");
+    this.clearCookie("email");
+
     window.location.href =
-      "https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com/logout?client_id=5oncoq9mddhbmluooq6kpib2kj&logout_uri=http://127.0.0.1:5500/index.html";
+      "https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com/logout?client_id=5oncoq9mddhbmluooq6kpib2kj&logout_uri=http://127.0.0.1:5500/src/main/resources/static/index.html";
+  }
+
+  /**
+   * Retrieves the value of a specified cookie.
+   * @param {string} name - The name of the cookie to retrieve.
+   * @returns {string|null} The cookie value or null if not found.
+   */
+  getCookie(name) {
+    const cookieString = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return cookieString ? decodeURIComponent(cookieString.split("=")[1]) : null;
+  }
+
+  /**
+   * Clears a specified cookie by setting its expiration to the past.
+   * @param {string} name - The name of the cookie to clear.
+   */
+  clearCookie(name) {
+    document.cookie = `${name}=; Max-Age=0; path=/`;
   }
 }
 
