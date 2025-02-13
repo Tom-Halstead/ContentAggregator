@@ -1,9 +1,12 @@
+"use strict";
+
 class AuthManager {
   constructor() {
     this.authBtn = document.getElementById("authButton");
     this.authTitle = document.getElementById("auth-title");
     this.initEventListeners();
-    this.loadUserData();
+    this.processLoginFromUrl(); // NEW: Process login from URL if redirected after OAuth2 login
+    this.checkLoginStatus();
   }
 
   /**
@@ -27,125 +30,194 @@ class AuthManager {
   }
 
   /**
-   * Checks if the user is authenticated by looking for the access token cookie.
+   * Checks if the user is authenticated by looking for an access token in sessionStorage.
    * @returns {boolean} True if authenticated, otherwise false.
    */
   isAuthenticated() {
-    return this.getCookie("access_token") !== null;
+    const token = sessionStorage.getItem("access_token");
+    console.log("Checking authentication. Found token:", token);
+    return token !== null;
   }
 
   /**
-   * Loads user data from cookies and updates the UI.
+   * Extracts query parameters from the URL.
+   * @returns {Object} Query parameters as key-value pairs.
    */
-  loadUserData() {
-    if (!this.isAuthenticated()) {
-      console.error("User is not logged in.");
+  getQueryParams() {
+    let params = {};
+    window.location.search
+      .substring(1)
+      .split("&")
+      .forEach((param) => {
+        let pair = param.split("=");
+        params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || "");
+      });
+    return params;
+  }
+
+  /**
+   * ✅ NEW: Handles login from URL query parameters after redirect.
+   * Stores credentials in sessionStorage & updates UI.
+   */
+  processLoginFromUrl() {
+    console.log("Processing login from URL...");
+    const params = this.getQueryParams();
+
+    if (params.access_token) {
+      console.log("✅ Found login details in URL. Storing in sessionStorage.");
+      sessionStorage.setItem("access_token", params.access_token);
+      sessionStorage.setItem("username", params.username || "User");
+      sessionStorage.setItem("email", params.email || "");
+
+      // Remove login parameters from URL to keep it clean
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+
+  /**
+   * ✅ UPDATED: Checks login status using sessionStorage instead of calling `/post-login`
+   */
+  checkLoginStatus() {
+    console.log("Checking login status...");
+
+    // Retrieve token from sessionStorage
+    const accessToken = sessionStorage.getItem("access_token");
+    if (!accessToken) {
+      console.warn("No access token found in sessionStorage.");
       this.updateUI(false);
       return;
     }
 
-    const username = this.getCookie("username") || "User";
-    const email = this.getCookie("email");
-
-    console.log("User Info:", { username, email });
-    this.updateUI(true, { username, email });
+    // Use stored data to update UI
+    this.updateUI(true, {
+      username: sessionStorage.getItem("username"),
+      email: sessionStorage.getItem("email"),
+    });
   }
 
   /**
-   * Updates the UI based on the user's login status.
+   * ✅ Loads user data from an API if necessary.
+   */
+  async loadUserData() {
+    console.log("Loading user data...");
+    const accessToken = sessionStorage.getItem("access_token");
+
+    if (!accessToken) {
+      console.error("User is not logged in. No token found in sessionStorage.");
+      this.updateUI(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/api/user-info", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("User not authenticated");
+      }
+
+      const user = await response.json();
+      console.log("User Info received from API:", user);
+
+      sessionStorage.setItem("username", user.username);
+      sessionStorage.setItem("email", user.email);
+      sessionStorage.setItem("access_token", user.accessToken);
+
+      this.updateUI(true, user);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      this.updateUI(false);
+    }
+  }
+
+  /**
+   * ✅ Updates the UI based on the user's login status.
    * @param {boolean} isLoggedIn - Whether the user is logged in.
    * @param {Object|null} user - User information containing username and email.
    */
   updateUI(isLoggedIn, user = null) {
+    console.log("Updating UI. User logged in:", isLoggedIn);
+
+    // Capitalize first letter of the username
+    const formattedUsername = user?.username
+      ? user.username.charAt(0).toUpperCase() + user.username.slice(1)
+      : "User";
+
     this.authBtn.innerText = isLoggedIn ? "Logout" : "Login/Register";
     this.authTitle.innerText = isLoggedIn
-      ? `Hello, ${user?.username || "User"}!`
+      ? `Hello, ${formattedUsername}!`
       : "Welcome!";
   }
 
   /**
-   * Logs the user out by clearing authentication cookies and redirecting to Cognito logout.
+   * ✅ Logs the user out by clearing sessionStorage and redirecting to Cognito logout.
    */
   logout() {
-    this.clearCookie("access_token");
-    this.clearCookie("username");
-    this.clearCookie("email");
+    console.log("Logging out...");
+    this.clearSession();
 
     window.location.href =
-      "https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com/logout?client_id=5oncoq9mddhbmluooq6kpib2kj&logout_uri=http://127.0.0.1:5500/src/main/resources/static/index.html";
+      "https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com/logout?client_id=5oncoq9mddhbmluooq6kpib2kj&logout_uri=http://127.0.0.1:5500/index.html";
   }
 
   /**
-   * Retrieves the value of a specified cookie.
-   * @param {string} name - The name of the cookie to retrieve.
-   * @returns {string|null} The cookie value or null if not found.
+   * ✅ Clears session storage data on logout or login failure.
    */
-  getCookie(name) {
-    const cookieString = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(name + "="));
-    return cookieString ? decodeURIComponent(cookieString.split("=")[1]) : null;
-  }
-
-  /**
-   * Clears a specified cookie by setting its expiration to the past.
-   * @param {string} name - The name of the cookie to clear.
-   */
-  clearCookie(name) {
-    document.cookie = `${name}=; Max-Age=0; path=/`;
+  clearSession() {
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("email");
+    this.updateUI(false);
   }
 }
 
 // Wait for DOM to load
-document.addEventListener("DOMContentLoaded", () => {
+window.onload = function () {
+  console.log("Page Loaded, Checking Auth...");
   new AuthManager();
+  new ProfileManager();
   new ContentManager();
-});
+};
 
-// class ProfileManager {
-//   constructor(authManager) {
-//     this.authManager = authManager;
-//     this.profileEndpoint = "http://localhost:8080/api/profile";
-//   }
+class ProfileManager {
+  constructor(authManager) {
+    this.authManager = authManager;
+    this.profileEndpoint = "http://localhost:8080/api/profile";
+  }
 
-//   fetchUserProfile() {
-//     const token = localStorage.getItem("access_token");
-//     if (!token) {
-//       console.error("No access token available.");
-//       return;
-//     }
+  fetchUserProfile() {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      console.error("No access token available.");
+      return;
+    }
 
-//     fetch(this.profileEndpoint, {
-//       method: "GET",
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         "Content-Type": "application/json",
-//       },
-//     })
-//       .then((response) => {
-//         if (!response.ok) {
-//           throw new Error(`HTTP status ${response.status}`);
-//         }
-//         return response.json();
-//       })
-//       .then((profileData) => {
-//         console.log("Profile data received:", profileData);
-//       })
-//       .catch((error) => {
-//         console.error("Error fetching profile data:", error);
-//       });
-//   }
-// }
-
-// document.addEventListener("DOMContentLoaded", () => {
-// const profileManager = new ProfileManager(authManager);
-
-// document.getElementById("profileButton").addEventListener("click", () => {
-//   profileManager.fetchUserProfile();
-// });
-
-// authManager.updateUI(!!localStorage.getItem("access_token"));
-// });
+    fetch(this.profileEndpoint, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP status ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((profileData) => {
+        console.log("Profile data received:", profileData);
+      })
+      .catch((error) => {
+        console.error("Error fetching profile data:", error);
+      });
+  }
+}
 
 class ContentManager {
   constructor() {

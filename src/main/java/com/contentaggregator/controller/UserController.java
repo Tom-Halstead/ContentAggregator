@@ -17,26 +17,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/user-info")
+@RequestMapping("/api")
 public class UserController {
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getUserInfo(Authentication authentication) {
-        if (authentication == null) {
-            return ResponseEntity.status(401).body(Map.of("error", "User is not authenticated"));
+    @GetMapping("/user-info")
+    public ResponseEntity<Map<String, Object>> getUserInfo(@AuthenticationPrincipal OidcUser oidcUser) {
+        if (oidcUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        if (authentication instanceof OAuth2AuthenticationToken oauth2Auth) {
-            OidcUser oidcUser = (OidcUser) oauth2Auth.getPrincipal();
-            Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("username", oidcUser.getAttribute("cognito:username"));
-            userInfo.put("email", oidcUser.getAttribute("email"));
-            userInfo.put("cognito_uuid", oidcUser.getAttribute("sub"));
+        // ✅ Retrieve user details from the ID token
+        String username = oidcUser.getAttribute("cognito:username");
+        String email = oidcUser.getAttribute("email");
+        String accessToken = oidcUser.getIdToken().getTokenValue();
 
-            return ResponseEntity.ok(userInfo);
-        }
-
-        return ResponseEntity.status(400).body(Map.of("error", "Invalid authentication type"));
+        return ResponseEntity.ok(Map.of(
+                "username", username,
+                "email", email,
+                "access_token", accessToken // ✅ Send token in response
+        ));
     }
 
 

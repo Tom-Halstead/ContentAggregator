@@ -22,11 +22,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.naming.AuthenticationException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping
+@RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
@@ -37,49 +41,76 @@ public class AuthController {
     }
 
 
+//    @GetMapping("/post-login")
+//    public ResponseEntity<Map<String, Object>> postLogin(Authentication authentication) {
+//        if (!(authentication instanceof OAuth2AuthenticationToken oauth2Auth)) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        // ✅ Fetch authorized client using the registered service
+//        OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
+//                oauth2Auth.getAuthorizedClientRegistrationId(),
+//                oauth2Auth.getName()
+//        );
+//
+//        if (client == null || client.getAccessToken() == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        String accessToken = client.getAccessToken().getTokenValue();
+//
+//        // ✅ Retrieve user details
+//        OidcUser oidcUser = (OidcUser) oauth2Auth.getPrincipal();
+//        String username = oidcUser.getAttribute("cognito:username");
+//        String email = oidcUser.getAttribute("email");
+//
+//        // ✅ Return user details + access token to frontend
+//        return ResponseEntity.ok(Map.of(
+//                "username", username,
+//                "email", email,
+//                "access_token", accessToken
+//        ));
+//    }
+
     @GetMapping("/post-login")
-    public ResponseEntity<Void> postLogin(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        if (!(authentication instanceof OAuth2AuthenticationToken oauth2Auth)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<Object> postLogin(OAuth2AuthenticationToken authentication) {
+        try {
+            // ✅ Get user attributes
+            Map<String, Object> attributes = authentication.getPrincipal().getAttributes();
+
+            // ✅ Print attributes for debugging
+            System.out.println("User Attributes: " + attributes);
+
+            // ✅ Retrieve attributes safely
+            String username = (String) attributes.getOrDefault("username", attributes.getOrDefault("cognito:username", "unknown_user"));
+            String email = (String) attributes.getOrDefault("email", "unknown_email");
+            String accessToken = attributes.containsKey("access_token") ? (String) attributes.get("access_token") : "no_access_token";
+
+            // ✅ Encode values for URL safety
+            String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
+            String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
+            String encodedAccessToken = URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
+
+            // ✅ Construct redirect URL to homepage with user details
+            String redirectUrl = String.format("http://127.0.0.1:5500/src/main/resources/static/index.html?username=%s&email=%s&access_token=%s",
+                    encodedUsername, encodedEmail, encodedAccessToken);
+
+            System.out.println("Redirecting to: " + redirectUrl);
+
+            // ✅ Redirect to homepage with user data
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create(redirectUrl));
+
+            return ResponseEntity.status(302).headers(headers).build();
+
+        } catch (Exception e) {
+            System.out.println("Error in postLogin: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Login error: " + e.getMessage());
         }
-
-        // ✅ Correct way to get the access token
-        OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
-                oauth2Auth.getAuthorizedClientRegistrationId(),
-                oauth2Auth.getName()
-        );
-
-        if (client == null || client.getAccessToken() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String accessToken = client.getAccessToken().getTokenValue();
-
-        // ✅ Retrieve user details
-        OidcUser oidcUser = (OidcUser) oauth2Auth.getPrincipal();
-        String username = oidcUser.getAttribute("cognito:username");
-        String email = oidcUser.getAttribute("email");
-        String cognitoUuid = oidcUser.getAttribute("sub");
-
-        // ✅ Store details in cookies (for frontend use)
-        response.addCookie(createCookie("username", username, false));
-        response.addCookie(createCookie("email", email, false));
-        response.addCookie(createCookie("access_token", accessToken, true)); // Secure access token
-
-        // ✅ Redirect user to frontend
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .header("Location", "http://127.0.0.1:5500/index.html")
-                .build();
     }
 
-    private Cookie createCookie(String name, String value, boolean httpOnly) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setPath("/");
-        cookie.setHttpOnly(httpOnly); // Restrict access to JavaScript if true
-        cookie.setMaxAge(60 * 60); // 1 hour
-        return cookie;
-    }
+
+
 
 
     @PostMapping("/post-logout")
