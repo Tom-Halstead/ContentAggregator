@@ -7,9 +7,6 @@ import com.contentaggregator.repository.NewsSourceRepository;
 import com.contentaggregator.repository.UserNewsSourceRepository;
 import com.contentaggregator.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
-import java.security.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,10 +28,13 @@ public class UserNewsSourceService {
     }
 
     public void addUserSource(int userId, int sourceId, String customParams) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        NewsSource newsSource = newsSourceRepository.findById(sourceId).orElseThrow(() -> new RuntimeException("News source not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        UserNewsSource userNewsSource = new UserNewsSource(user, newsSource, customParams, new LocalDate.now());
+        NewsSource newsSource = newsSourceRepository.findById(sourceId)
+                .orElseThrow(() -> new RuntimeException("News source not found"));
+
+        UserNewsSource userNewsSource = new UserNewsSource(user, newsSource, customParams, LocalDateTime.now());
         userNewsSourceRepository.save(userNewsSource);
     }
 }
