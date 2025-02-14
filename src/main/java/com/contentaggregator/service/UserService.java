@@ -28,8 +28,7 @@ public class UserService {
         if (existingUser.isPresent()) {
             // ✅ User exists, update lastLogin
             User user = existingUser.get();
-            user.setLastLogin(LocalDateTime.now());
-            return userRepository.save(user);
+            return userRepository.save(updateLastLogin(user));
         } else {
             // ✅ New user, save to DB
             User newUser = new User(username, email, cognitoUuid);
@@ -37,8 +36,7 @@ public class UserService {
         }
     }
 
-    public User updateLastLogin(String cognitoUuid) {
-        User user = getUserInfoByCognitoUuid(cognitoUuid);
+    public User updateLastLogin(User user) {
         user.setLastLogin(LocalDateTime.now());
         return userRepository.save(user);
     }

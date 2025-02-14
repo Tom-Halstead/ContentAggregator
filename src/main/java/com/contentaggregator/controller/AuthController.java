@@ -1,5 +1,6 @@
 package com.contentaggregator.controller;
 
+import com.contentaggregator.model.User;
 import com.contentaggregator.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,6 +50,10 @@ public class AuthController {
 
         String username = attributes.get("username") != null ? attributes.get("username").toString() : "unknown_user";
         String email = attributes.get("email") != null ? attributes.get("email").toString() : "unknown_email";
+        String cognitoUuid = attributes.get("sub") != null ? attributes.get("sub").toString() : "unknown_uuid";
+
+        userService.saveOrUpdateUser(username, email, cognitoUuid);
+
         // ✅ Construct the correct redirect URL
         String redirectUrl = String.format("http://127.0.0.1:5500/src/main/resources/static/index.html?username=%s&email=%s&access_token=%s",
                 username, email, accessToken);
