@@ -42,7 +42,7 @@ public class AppSecurityConfig implements WebMvcConfigurer {
     @Value("${aws.cognito.domain}")
     private String domain;
 
-    private String scope = "email openid";
+    private String scope = "profile email openid";
 
     public String getClientId() {
         return clientId;
@@ -125,6 +125,7 @@ public class AppSecurityConfig implements WebMvcConfigurer {
                         .defaultSuccessUrl("/api/auth/post-login", true)
                         .failureUrl("/login-failed")
                 )
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt())
                 .sessionManagement(session -> session
                         .sessionFixation().none() // ✅ Prevent session ID change after login
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // ✅ Ensure session is maintained
