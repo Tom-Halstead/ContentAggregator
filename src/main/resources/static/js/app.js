@@ -30,11 +30,11 @@ class AuthManager {
   }
 
   /**
-   * Checks if the user is authenticated by looking for an access token in sessionStorage.
+   * Checks if the user is authenticated by looking for an access token in localStorage.
    * @returns {boolean} True if authenticated, otherwise false.
    */
   isAuthenticated() {
-    const token = sessionStorage.getItem("access_token");
+    const token = localStorage.getItem("access_token");
     console.log("Checking authentication. Found token:", token);
     return token !== null;
   }
@@ -57,17 +57,17 @@ class AuthManager {
 
   /**
    * ✅ NEW: Handles login from URL query parameters after redirect.
-   * Stores credentials in sessionStorage & updates UI.
+   * Stores credentials in localStorage & updates UI.
    */
   processLoginFromUrl() {
     console.log("Processing login from URL...");
     const params = this.getQueryParams();
 
     if (params.access_token) {
-      console.log("✅ Found login details in URL. Storing in sessionStorage.");
-      sessionStorage.setItem("access_token", params.access_token);
-      sessionStorage.setItem("username", params.username || "User");
-      sessionStorage.setItem("email", params.email || "");
+      console.log("✅ Found login details in URL. Storing in localStorage.");
+      localStorage.setItem("access_token", params.access_token);
+      localStorage.setItem("username", params.username || "User");
+      localStorage.setItem("email", params.email || "");
 
       // Remove login parameters from URL to keep it clean
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -75,23 +75,23 @@ class AuthManager {
   }
 
   /**
-   * ✅ UPDATED: Checks login status using sessionStorage instead of calling `/post-login`
+   * ✅ UPDATED: Checks login status using localStorage instead of calling `/post-login`
    */
   checkLoginStatus() {
     console.log("Checking login status...");
 
-    // Retrieve token from sessionStorage
-    const accessToken = sessionStorage.getItem("access_token");
+    // Retrieve token from localStorage
+    const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
-      console.warn("No access token found in sessionStorage.");
+      console.warn("No access token found in localStorage.");
       this.updateUI(false);
       return;
     }
 
     // Use stored data to update UI
     this.updateUI(true, {
-      username: sessionStorage.getItem("username"),
-      email: sessionStorage.getItem("email"),
+      username: localStorage.getItem("username"),
+      email: localStorage.getItem("email"),
     });
   }
 
@@ -100,10 +100,10 @@ class AuthManager {
    */
   async loadUserData() {
     console.log("Loading user data...");
-    const accessToken = sessionStorage.getItem("access_token");
+    const accessToken = localStorage.getItem("access_token");
 
     if (!accessToken) {
-      console.error("User is not logged in. No token found in sessionStorage.");
+      console.error("User is not logged in. No token found in localStorage.");
       this.updateUI(false);
       return;
     }
@@ -124,9 +124,9 @@ class AuthManager {
       const user = await response.json();
       console.log("User Info received from API:", user);
 
-      sessionStorage.setItem("username", user.username);
-      sessionStorage.setItem("email", user.email);
-      sessionStorage.setItem("access_token", user.accessToken);
+      localStorage.setItem("username", user.username);
+      localStorage.setItem("email", user.email);
+      localStorage.setItem("access_token", user.accessToken);
 
       this.updateUI(true, user);
     } catch (error) {
@@ -155,7 +155,7 @@ class AuthManager {
   }
 
   /**
-   * ✅ Logs the user out by clearing sessionStorage and redirecting to Cognito logout.
+   * ✅ Logs the user out by clearing localStorage and redirecting to Cognito logout.
    */
   logout() {
     console.log("Logging out...");
@@ -174,9 +174,9 @@ class AuthManager {
    * ✅ Clears session storage data on logout or login failure.
    */
   clearSession() {
-    sessionStorage.removeItem("access_token");
-    sessionStorage.removeItem("username");
-    sessionStorage.removeItem("email");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
     this.updateUI(false);
   }
 }

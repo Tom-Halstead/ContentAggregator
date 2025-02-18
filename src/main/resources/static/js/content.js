@@ -21,11 +21,28 @@ class ContentManager {
    */
   async fetchNewsSources() {
     try {
-      const response = await fetch("http://localhost:8080/api/news-sources");
+      // Get the access token (assuming it's stored in localStorage)
+      const accessToken = localStorage.getItem("access_token"); // Modify if stored elsewhere
+
+      if (!accessToken) {
+        throw new Error("No access token found. Please log in.");
+      }
+
+      // Send the token in the Authorization header
+      const response = await fetch("http://localhost:8080/api/news-sources", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json", // Optional, depending on your API
+        },
+      });
+
       if (!response.ok) {
         throw new Error("Failed to fetch news sources.");
       }
+
       const newsSources = await response.json();
+      console.log(newsSources);
       this.displayNewsSources(newsSources);
     } catch (error) {
       console.error("Error loading news sources:", error);
