@@ -8,7 +8,9 @@
     <artifactId>contentaggregator</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Content Aggregator</name>
-    <description>A web-based application for aggregating and displaying content from various sources based on user preferences.</description>
+    <description>A web-based application for aggregating and displaying content from various sources based on user
+        preferences.
+    </description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -42,6 +44,13 @@
             <version>2.12.0</version>
         </dependency>
 
+
+        <!--    MODEL MAPPER, NEVER USED IT BEFORE    -->
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>3.1.0</version>
+        </dependency>
 
 
         <!-- For @Data Annotation -->

@@ -1,6 +1,7 @@
 package com.contentaggregator.response;
 
-import com.contentaggregator.model.NewsArticle;
+import com.contentaggregator.dto.NewsArticleDTO;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +10,10 @@ import java.util.List;
 public class NewsApiResponse {
 
     private String status;
+
+    @JsonProperty("totalResults")
     private int totalResults;
-    private List<NewsArticle> articleList;
+    @JsonProperty("articles")
+    private List<NewsArticleDTO> articles;
 
 }
