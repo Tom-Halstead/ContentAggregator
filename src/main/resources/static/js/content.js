@@ -2,34 +2,33 @@
 
 class ContentManager {
   constructor() {
-    this.newsContainer = document.getElementById("article");
-    this.randomizeBtn = document.getElementById("randomize");
+    this.newsContainerReddit = document.querySelector(
+      '[data-category="Reddit"] .news-container'
+    );
+    this.newsContainerLocal = document.querySelector(
+      '[data-category="Local"] .news-container'
+    );
+    this.newsContainerWorld = document.querySelector(
+      '[data-category="World"] .news-container'
+    );
 
-    this.initEventListeners();
-    this.fetchUserNewsSources();
+    // Fetch the initial user news sources and display random news on DOM load
+    this.fetchRandomNews();
   }
 
   /**
-   * Initializes event listeners
+   * Fetches random news articles from the back-end API and updates the DOM.
    */
-  initEventListeners() {
-    this.randomizeBtn.addEventListener("click", () => this.fetchRandomNews());
-  }
-
-  /**
-   * Fetches news sources from the back-end API.
-   */
-  async fetchUserNewsSources() {
+  async fetchRandomNews() {
     try {
-      // Get the access token (assuming it's stored in localStorage)
       const accessToken = localStorage.getItem("access_token");
 
+      // Check if the access token is present
       if (!accessToken) {
-        throw new Error("No access token found. Please log in.");
+        throw new Error("Access token not found. Please log in.");
       }
 
-      // Send the token in the Authorization header
-      const response = await fetch("http://localhost:8080/api/news-sources", {
+      const response = await fetch("http://localhost:8080/api/news/articles", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -37,63 +36,98 @@ class ContentManager {
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch news sources.");
+      // Handle unauthorized access (401 error)
+      if (response.status === 401) {
+        throw new Error("Unauthorized. Please log in to access the articles.");
       }
 
-      const newsSources = await response.json();
-      console.log(newsSources);
-      this.displayNewsSources(newsSources);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch articles. Status: ${response.status}`);
+      }
+
+      const articles = await response.json();
+
+      // Ensure articles is an array
+      if (!Array.isArray(articles)) {
+        throw new Error("Invalid data format: Expected an array of articles.");
+      }
+
+      // Clear current articles before adding new ones
+      this.clearNewsContainers();
+
+      // Add all articles to all categories (no filtering by category)
+      this.addArticlesToCategory(articles);
     } catch (error) {
-      console.error("Error loading news sources:", error);
+      console.error("Error fetching articles:", error.message);
     }
   }
 
   /**
-   * Fetches random news and updates UI.
+   * Clears all news containers before adding new content.
    */
-  async fetchRandomNews() {
-    try {
-      const response = await fetch("http://localhost:8080/api/news/random");
-      if (!response.ok) {
-        throw new Error("Failed to fetch random news.");
-      }
-      const randomNews = await response.json();
-      this.displayNewsSources(randomNews);
-    } catch (error) {
-      console.error("Error fetching random news:", error);
+  clearNewsContainers() {
+    // Remove all child nodes from each container using removeChild
+    this.removeAllChildren(this.newsContainerReddit);
+    this.removeAllChildren(this.newsContainerLocal);
+    this.removeAllChildren(this.newsContainerWorld);
+  }
+
+  /**
+   * Removes all child elements from a given container.
+   * @param {HTMLElement} container The container to clear
+   */
+  removeAllChildren(container) {
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
     }
   }
 
   /**
-   * Displays news sources dynamically in the UI.
+   * Adds all articles to each category container.
+   * @param {Array} articles The articles data
    */
-  displayNewsSources(newsSources) {
-    document.querySelectorAll(".news-container").forEach((container) => {
-      container.innerHTML = ""; // Clear previous content
-    });
+  addArticlesToCategory(articles) {
+    articles.forEach((article) => {
+      const row = this.createRowElement(article);
 
-    newsSources.forEach((source) => {
-      const category = source.category || "General";
-      const section = document.querySelector(
-        `section[data-category="${category}"] .news-container`
-      );
-
-      if (section) {
-        const articleElement = document.createElement("div");
-        articleElement.classList.add("news-card");
-        articleElement.innerHTML = `
-          <h3>${source.name}</h3>
-          <p><strong>Category:</strong> ${category}</p>
-          <a href="${source.url}" target="_blank">Read More</a>
-        `;
-        section.appendChild(articleElement);
-      }
+      // Append the article to all category containers
+      this.newsContainerReddit.appendChild(row);
+      this.newsContainerLocal.appendChild(row.cloneNode(true)); // Use cloneNode to append the same article to multiple containers
+      this.newsContainerWorld.appendChild(row.cloneNode(true));
     });
+  }
+
+  /**
+   * Creates a DOM element for a row with article data.
+   * @param {Object} article The article data
+   * @returns {HTMLElement} The created row DOM element
+   */
+  createRowElement(article) {
+    const row = document.createElement("div");
+    row.classList.add("row");
+
+    // Create and append the article title
+    const title = document.createElement("h3");
+    title.textContent = article.title;
+    row.appendChild(title);
+
+    // Create and append the article description
+    const description = document.createElement("p");
+    description.textContent = article.description;
+    row.appendChild(description);
+
+    // Create and append the "Read More" link
+    const link = document.createElement("a");
+    link.href = article.url;
+    link.textContent = "Read More";
+    link.target = "_blank"; // Open in a new tab
+    row.appendChild(link);
+
+    return row;
   }
 }
 
-// Initialize ContentManager when the page loads
+// Initialize the ContentManager object
 document.addEventListener("DOMContentLoaded", () => {
   new ContentManager();
 });

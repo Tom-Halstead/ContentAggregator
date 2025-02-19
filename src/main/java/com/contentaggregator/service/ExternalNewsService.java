@@ -1,84 +1,90 @@
 package com.contentaggregator.service;
 
-
 import com.contentaggregator.dto.NewsArticleDTO;
-import com.contentaggregator.model.NewsSource;
 import com.contentaggregator.response.NewsApiResponse;
 import lombok.Getter;
+import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Service
 public class ExternalNewsService {
 
     private final RestTemplate restTemplate;
-    @Value("${news.api.key}")
-    private final String newsApiKey;
+
+    private final String NEWS_API_KEY;
 
     @Autowired
-    public ExternalNewsService(RestTemplate restTemplate, String newsApiKey) {
+    public ExternalNewsService(RestTemplate restTemplate, @Value("${news.api.key}") String NEWS_API_KEY) {
         this.restTemplate = restTemplate;
-        this.newsApiKey = newsApiKey;
+        this.NEWS_API_KEY = NEWS_API_KEY;
     }
 
-
+    /**
+     * Fetch articles by source and category.
+     */
     public List<NewsArticleDTO> fetchArticlesBySource(String apiType, String category) {
-        String apiUrl = String.format(
-                "https://newsapi.org/v2/everything?q=%s&sources=%s&apiKey=%s",
-                URLEncoder.encode(category, StandardCharsets.UTF_8), apiType, newsApiKey
-        );
-        return fetchArticlesFromApi(apiUrl);
+        Map<String, String> userParams = new HashMap<>();
+        userParams.put("q", category); // You can modify or add more params based on user preferences
+        userParams.put("sources", apiType); // The source defined by the user
+
+        return fetchArticlesFromApi("https://newsapi.org/v2/everything", userParams);
     }
 
-    public List<NewsSource> fetchArticlesByCategory(String category) {
-        String apiUrl = String.format(
-                "https://newsapi.org/v2/everything?q=%s&apiKey=%s",
-                URLEncoder.encode(category, StandardCharsets.UTF_8), newsApiKey
-        );
-        return fetchArticlesFromApi(apiUrl);
+    /**
+     * Fetch articles by category (uses top-headlines endpoint).
+     */
+    public List<NewsArticleDTO> fetchArticlesByCategory(String category) {
+        Map<String, String> userParams = new HashMap<>();
+        userParams.put("category", category);
+
+        return fetchArticlesFromApi("https://newsapi.org/v2/top-headlines", userParams);
     }
 
+    /**
+     * Fetch articles based on a user's preferred sources.
+     */
     public List<NewsArticleDTO> fetchArticlesByUserPreferences(int userId) {
-        // Mock fetching user's preferred sources from the database (replace with actual repository call)
+        // Replace with actual repository call to fetch preferred sources for the user
         List<String> userPreferredSources = List.of("techcrunch", "bbc-news");
 
         List<NewsArticleDTO> aggregatedArticles = new ArrayList<>();
         for (String source : userPreferredSources) {
-            String apiUrl = String.format(
-                    "https://newsapi.org/v2/everything?sources=%s&apiKey=%s",
-                    source, newsApiKey
-            );
-            aggregatedArticles.addAll(fetchArticlesFromApi(apiUrl));
+            Map<String, String> userParams = new HashMap<>();
+            userParams.put("sources", source); // User's preferred source
+
+            // Fetch articles from each preferred source
+            aggregatedArticles.addAll(fetchArticlesFromApi("https://newsapi.org/v2/everything", userParams));
         }
         return aggregatedArticles;
     }
 
-    private List<NewsArticleDTO> fetchArticlesFromApi(String apiUrl) {
-        ResponseEntity<NewsApiResponse> response = restTemplate.getForEntity(apiUrl, NewsApiResponse.class);
-
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            return response.getBody().getArticles();
-        } else {
-            throw new RuntimeException("Failed to fetch news articles from external API");
-        }
-    }
-
-    public List<NewsArticleDTO> fetchArticles(String source, String category, String query, String language, String sortBy, int pageSize, int page) {
+    public List<NewsArticleDTO> fetchArticles(
+            String source, String category, String query,
+            String language, String sortBy, int pageSize, int page
+    ) {
         StringBuilder apiUrl;
 
         if (category != null && !category.isEmpty()) {
+            // Use /top-headlines when category is specified
             apiUrl = new StringBuilder("https://newsapi.org/v2/top-headlines?");
-            apiUrl.append("category=").append(category).append("&");
+            apiUrl.append("category=").append(URLEncoder.encode(category, StandardCharsets.UTF_8)).append("&");
         } else {
+            // Use /everything when category is not provided
             apiUrl = new StringBuilder("https://newsapi.org/v2/everything?");
             if (query != null && !query.isEmpty()) {
                 apiUrl.append("q=").append(URLEncoder.encode(query, StandardCharsets.UTF_8)).append("&");
@@ -86,20 +92,73 @@ public class ExternalNewsService {
             if (source != null && !source.isEmpty()) {
                 apiUrl.append("sources=").append(source).append("&");
             }
-            apiUrl.append("sortBy=").append(sortBy).append("&");
+            if (sortBy != null && !sortBy.isEmpty()) {
+                apiUrl.append("sortBy=").append(sortBy).append("&");
+            }
         }
 
-        apiUrl.append("language=").append(language)
-                .append("&pageSize=").append(pageSize)
-                .append("&page=").append(page)
-                .append("&apiKey=").append(newsApiKey);
+        // Add common parameters
+        apiUrl.append("language=").append(language != null ? language : "en")
+                .append("&pageSize=").append(pageSize > 0 ? pageSize : 10)
+                .append("&page=").append(page > 0 ? page : 1)
+                .append("&apiKey=").append(getNEWS_API_KEY());
 
-        ResponseEntity<NewsApiResponse> response = restTemplate.getForEntity(apiUrl.toString(), NewsApiResponse.class);
+        return fetchArticlesFromApi(apiUrl.toString(), new HashMap<>());  // Passing empty map or any other params
+    }
 
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            return response.getBody().getArticles();  // ✅ Returns List<NewsArticleDTO>
-        } else {
-            throw new RuntimeException("Failed to fetch news articles from external API");
+    /**
+     * Handles the actual API call and maps the response to a list of NewsArticleDTO.
+     */
+    private List<NewsArticleDTO> fetchArticlesFromApi(String baseUrl, Map<String, String> userParams) {
+        try {
+            // Check if any of the required parameters are missing, and set a default if necessary
+            if (!userParams.containsKey("q") && !userParams.containsKey("qInTitle") &&
+                    !userParams.containsKey("sources") && !userParams.containsKey("domains")) {
+                // If no required parameter is provided, set a default 'q' parameter
+                userParams.put("q", "latest");  // Example default, change as needed
+            }
+
+            // Build the API URL with user parameters dynamically using URIBuilder
+            URIBuilder uriBuilder = new URIBuilder(baseUrl);
+
+            // Add each user-defined parameter to the URI
+            for (Map.Entry<String, String> param : userParams.entrySet()) {
+                uriBuilder.addParameter(param.getKey(), param.getValue());
+            }
+
+            // Check if the API key is already appended to the URL
+            String apiUrl = uriBuilder.toString();
+            if (!apiUrl.contains("apiKey=")) {
+                // Append the API key if not already present
+                uriBuilder.addParameter("apiKey", getNEWS_API_KEY());
+            }
+
+            // Build the URI from the URIBuilder
+            URI uri = uriBuilder.build();
+
+            // Set up headers
+            HttpHeaders headers = new HttpHeaders();
+
+            // Set up HTTP request entity
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // Use RestTemplate to send the GET request
+            ResponseEntity<NewsApiResponse> response = restTemplate.exchange(uri, HttpMethod.GET, entity, NewsApiResponse.class);
+
+            // Check if the response is successful
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                List<NewsArticleDTO> articles = response.getBody().getArticles();
+                return articles != null ? articles : Collections.emptyList();
+            } else {
+                throw new RuntimeException("Failed to fetch news articles from external API: " + response.getStatusCode());
+            }
+
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            // Handle HTTP errors (e.g., 4xx or 5xx responses)
+            throw new RuntimeException("API call failed: " + e.getStatusCode());
+        } catch (Exception e) {
+            // Catch any other unexpected exceptions
+            throw new RuntimeException("An error occurred while fetching news articles", e);
         }
     }
 

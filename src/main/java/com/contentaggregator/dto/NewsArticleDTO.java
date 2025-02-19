@@ -15,7 +15,7 @@ public class NewsArticleDTO {
     private String author;
     @JsonProperty("title")
     private String title;
-    @JsonProperty("source")
+    @JsonProperty("description")
     private String description;
     @JsonProperty("url")
     private String url;

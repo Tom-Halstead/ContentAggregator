@@ -1,6 +1,6 @@
 package com.contentaggregator.controller;
 
-import com.contentaggregator.model.NewsSource;
+import com.contentaggregator.dto.NewsArticleDTO;
 import com.contentaggregator.service.ExternalNewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,6 @@ import java.util.List;
 @RequestMapping("/api/news")
 public class ExternalNewsController {
 
-
     private final ExternalNewsService externalNewsService;
 
     @Autowired
@@ -20,32 +19,45 @@ public class ExternalNewsController {
         this.externalNewsService = externalNewsService;
     }
 
-
-    // GET /api/news/sources/{apiType}/articles?category=technology
+    /**
+     * ✅ GET /api/news/sources/{apiType}/articles?category=technology
+     * Fetch articles by source (apiType) and category.
+     */
     @GetMapping("/sources/{apiType}/articles")
-    public ResponseEntity<List<NewsSource>> getArticlesBySource(
+    public ResponseEntity<List<NewsArticleDTO>> getArticlesBySource(
             @PathVariable String apiType,
-            @RequestParam String category) {
-        List<NewsSource> articles = externalNewsService.fetchArticlesBySource(apiType, category);
+            @RequestParam(required = false) String category
+    ) {
+        List<NewsArticleDTO> articles = externalNewsService.fetchArticlesBySource(apiType, category);
         return ResponseEntity.ok(articles);
     }
 
-    // GET /api/news/categories/{category}/articles
+    /**
+     * ✅ GET /api/news/categories/{category}/articles
+     * Fetch articles by category.
+     */
     @GetMapping("/categories/{category}/articles")
-    public ResponseEntity<List<NewsSource>> getArticlesByCategory(@PathVariable String category) {
-        List<NewsSource> articles = externalNewsService.fetchArticlesByCategory(category);
+    public ResponseEntity<List<NewsArticleDTO>> getArticlesByCategory(@PathVariable String category) {
+        List<NewsArticleDTO> articles = externalNewsService.fetchArticlesByCategory(category);
         return ResponseEntity.ok(articles);
     }
 
-    // GET /api/news/users/{userId}/articles
+    /**
+     * ✅ GET /api/news/users/{userId}/articles
+     * Fetch articles based on user's preferred news sources.
+     */
     @GetMapping("/users/{userId}/articles")
-    public ResponseEntity<List<NewsSource>> getArticlesByUser(@PathVariable int userId) {
-        List<NewsSource> articles = externalNewsService.fetchArticlesByUserPreferences(userId);
+    public ResponseEntity<List<NewsArticleDTO>> getArticlesByUser(@PathVariable int userId) {
+        List<NewsArticleDTO> articles = externalNewsService.fetchArticlesByUserPreferences(userId);
         return ResponseEntity.ok(articles);
     }
 
+    /**
+     * ✅ GET /api/news/articles?source=bbc-news&category=technology&query=AI
+     * Flexible endpoint to fetch articles with various filters.
+     */
     @GetMapping("/articles")
-    public ResponseEntity<List<NewsSource>> getArticles(
+    public ResponseEntity<List<NewsArticleDTO>> getArticles(
             @RequestParam(required = false) String source,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String query,
@@ -54,9 +66,9 @@ public class ExternalNewsController {
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestParam(required = false, defaultValue = "1") int page
     ) {
-        List<NewsSource> articles = externalNewsService.fetchArticles(source, category, query, language, sortBy, pageSize, page);
+        List<NewsArticleDTO> articles = externalNewsService.fetchArticles(source, category, query, language, sortBy, pageSize, page);
         return ResponseEntity.ok(articles);
     }
-
-
 }
+
+
