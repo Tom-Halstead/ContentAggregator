@@ -6,7 +6,7 @@ class ContentManager {
     this.randomizeBtn = document.getElementById("randomize");
 
     this.initEventListeners();
-    this.fetchNewsSources();
+    this.fetchUserNewsSources();
   }
 
   /**
@@ -19,10 +19,10 @@ class ContentManager {
   /**
    * Fetches news sources from the back-end API.
    */
-  async fetchNewsSources() {
+  async fetchUserNewsSources() {
     try {
       // Get the access token (assuming it's stored in localStorage)
-      const accessToken = localStorage.getItem("access_token"); // Modify if stored elsewhere
+      const accessToken = localStorage.getItem("access_token");
 
       if (!accessToken) {
         throw new Error("No access token found. Please log in.");
@@ -33,7 +33,7 @@ class ContentManager {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json", // Optional, depending on your API
+          "Content-Type": "application/json",
         },
       });
 

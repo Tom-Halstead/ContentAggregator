@@ -1,35 +1,48 @@
 package com.contentaggregator.controller;
 
-import com.contentaggregator.model.NewsSource;
-import com.contentaggregator.service.NewsSourceService;
-import com.contentaggregator.repository.NewsSourceRepository;
+import com.contentaggregator.model.NewsArticle;
+import com.contentaggregator.service.NewsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/news")
 public class NewsController {
-    private final NewsSourceRepository newsSourceRepository;
 
-    public NewsController(NewsSourceRepository newsSourceRepository) {
-        this.newsSourceRepository = newsSourceRepository;
+
+    private final NewsService newsService;
+
+    @Autowired
+    public NewsController(NewsService newsService) {
+        this.newsService = newsService;
     }
 
 
-    public List<NewsSource> getAllSources() {
-        return newsSourceRepository.findAll();
+    // GET /api/news/sources/{apiType}/articles?category=technology
+    @GetMapping("/sources/{apiType}/articles")
+    public ResponseEntity<List<NewsArticle>> getArticlesBySource(
+            @PathVariable String apiType,
+            @RequestParam String category) {
+        List<NewsArticle> articles = newsService.fetchArticlesBySource(apiType, category);
+        return ResponseEntity.ok(articles);
     }
 
-    public Optional<NewsSource> getSourceById(int id) {
-        return newsSourceRepository.findById(id);
+    // GET /api/news/categories/{category}/articles
+    @GetMapping("/categories/{category}/articles")
+    public ResponseEntity<List<NewsArticle>> getArticlesByCategory(@PathVariable String category) {
+        List<NewsArticle> articles = newsService.fetchArticlesByCategory(category);
+        return ResponseEntity.ok(articles);
     }
 
-    public NewsSource addNewsSource(NewsSource newsSource) {
-        return newsSourceRepository.save(newsSource);
+    // GET /api/news/users/{userId}/articles
+    @GetMapping("/users/{userId}/articles")
+    public ResponseEntity<List<NewsArticle>> getArticlesByUser(@PathVariable Long userId) {
+        List<NewsArticle> articles = newsService.fetchArticlesByUserPreferences(userId);
+        return ResponseEntity.ok(articles);
     }
+
+
 }

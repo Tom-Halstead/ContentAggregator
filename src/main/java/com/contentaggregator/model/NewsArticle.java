@@ -2,7 +2,6 @@ package com.contentaggregator.model;
 
 
 import jakarta.persistence.*;
-import jdk.jfr.DataAmount;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewsSource {
+public class NewsArticle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "news_source_id")
@@ -27,6 +26,6 @@ public class NewsSource {
     @Column(nullable = false)
     private String url;  // API endpoint or base URL
 
-    @Column
+    @Column(name = "category")
     private String category;  // e.g., "technology", "world"
 }

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.security.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,8 +12,8 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(UserNewsSourceId.class)  // Composite Key Handling
-public class UserNewsSource {
+@IdClass(UserNewsArticleId.class)  // Composite Key Handling
+public class UserNewsArticle {
 
     @Id
     @ManyToOne
@@ -24,7 +23,7 @@ public class UserNewsSource {
     @Id
     @ManyToOne
     @JoinColumn(name = "news_source_id", nullable = false)
-    private NewsSource newsSource;
+    private NewsArticle newsArticle;
 
     @Column(name = "custom_parameters", columnDefinition = "jsonb")
     private String customParameters;  // JSON parameters for filtering

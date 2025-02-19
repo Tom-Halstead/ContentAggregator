@@ -1,7 +1,7 @@
 package com.contentaggregator.controller;
 
-import com.contentaggregator.model.UserNewsSource;
-import com.contentaggregator.service.UserNewsSourceService;
+import com.contentaggregator.model.UserNewsArticle;
+import com.contentaggregator.service.UserNewsArticleService;
 import com.google.gson.Gson;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,16 +11,16 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user-news-sources")
-public class UserNewsSourceController {
-    private final UserNewsSourceService userNewsSourceService;
+public class UserNewsArticleController {
+    private final UserNewsArticleService userNewsArticleService;
 
-    public UserNewsSourceController(UserNewsSourceService userNewsSourceService) {
-        this.userNewsSourceService = userNewsSourceService;
+    public UserNewsArticleController(UserNewsArticleService userNewsArticleService) {
+        this.userNewsArticleService = userNewsArticleService;
     }
 
     @GetMapping("/{userId}")
-    public List<UserNewsSource> getUserNewsSources(@PathVariable int userId) {
-        return userNewsSourceService.getUserSources(userId);
+    public List<UserNewsArticle> getUserNewsSources(@PathVariable int userId) {
+        return userNewsArticleService.getUserSources(userId);
     }
 
     @PostMapping("/{userId}/{sourceId}")
@@ -32,7 +32,7 @@ public class UserNewsSourceController {
         Gson gson = new Gson();
         String customParamsJson = gson.toJson(params);  // Convert Map to JSON
 
-        userNewsSourceService.addUserSource(userId, sourceId, customParamsJson);
+        userNewsArticleService.addUserSource(userId, sourceId, customParamsJson);
         return ResponseEntity.ok("News source added successfully.");
     }
 

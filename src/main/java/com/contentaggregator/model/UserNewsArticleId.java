@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserNewsSourceId implements Serializable {
+public class UserNewsArticleId implements Serializable {
     private int user;
     private int newsSource;
 }
