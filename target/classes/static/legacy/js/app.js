@@ -163,7 +163,7 @@ class AuthManager {
 
     // ✅ Use "localhost" instead of "127.0.0.1"
     const logoutUrl = `https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com/logout?client_id=5oncoq9mddhbmluooq6kpib2kj&logout_uri=${encodeURIComponent(
-      "http://localhost:5500/src/main/resources/static/index.html"
+      "http://localhost:5500/src/main/resources/static/legacy/index.html"
     )}`;
 
     console.log("Redirecting to:", logoutUrl);
