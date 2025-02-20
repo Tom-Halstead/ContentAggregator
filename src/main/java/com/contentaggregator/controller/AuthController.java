@@ -88,7 +88,7 @@ public class AuthController {
         userService.saveOrUpdateUser(username, email, cognitoUuid);
 
         // ✅ Check referer to determine redirect
-        String finalRedirectUrl = "http://localhost:5500/"; // Default to HTML
+        String finalRedirectUrl = "http://localhost:5500/src/main/resources/static/legacy/index.html"; // Default to HTML
         if (referer != null) {
             if (referer.contains("5500")) {
                 finalRedirectUrl = "http://localhost:5500/src/main/resources/static/legacy/index.html";

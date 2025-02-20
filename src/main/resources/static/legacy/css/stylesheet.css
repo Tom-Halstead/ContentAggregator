@@ -175,7 +175,15 @@ article {
   align-items: center;
   text-align: center;
   margin-bottom: 1em;
+  max-width: 386px;
 }
+
+div.row img {
+  width: 320px;
+  /* width: max-content; */
+  /* max-width: fit-content; */
+}
+
 .row:hover {
   background-color: #cacaca;
   cursor: pointer;

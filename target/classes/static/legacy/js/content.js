@@ -63,6 +63,26 @@ class ContentManager {
     }
   }
 
+  async fetchRedditStories() {
+    try {
+      const response = await fetch(
+        "https://www.reddit.com/r/wtf/top.json?t=day&limit=5"
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      console.log(data);
+      data.data.children.forEach((post) => {
+        console.log(`Title: ${post.data.title}, Upvotes: ${post.data.ups}`);
+      });
+    } catch (error) {
+      console.error("Error fetching Reddit stories:", error);
+    }
+  }
+
   /**
    * Clears all news containers before adding new content.
    */
@@ -92,8 +112,8 @@ class ContentManager {
       const row = this.createRowElement(article);
 
       // Append the article to all category containers
-      this.newsContainerReddit.appendChild(row);
-      this.newsContainerLocal.appendChild(row.cloneNode(true)); // Use cloneNode to append the same article to multiple containers
+      // this.newsContainerReddit.appendChild(row);
+      // this.newsContainerLocal.appendChild(row.cloneNode(true)); // Use cloneNode to append the same article to multiple containers
       this.newsContainerWorld.appendChild(row.cloneNode(true));
     });
   }
@@ -112,16 +132,23 @@ class ContentManager {
     title.textContent = article.title;
     row.appendChild(title);
 
-    // Create and append the article description
-    const description = document.createElement("p");
-    description.textContent = article.description;
-    row.appendChild(description);
+    // ✅ Create and append the article image using 'urlToImage'
+    if (article.urlToImage) {
+      const img = document.createElement("img");
+      img.src = article.urlToImage;
+      row.appendChild(img);
+    } else {
+      // Create and append the article description
+      const description = document.createElement("p");
+      description.textContent = article.description;
+      row.appendChild(description);
+    }
 
     // Create and append the "Read More" link
     const link = document.createElement("a");
     link.href = article.url;
     link.textContent = "Read More";
-    link.target = "_blank"; // Open in a new tab
+    link.target = "_blank"; // Open link in a new tab
     row.appendChild(link);
 
     return row;
