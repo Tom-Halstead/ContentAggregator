@@ -46,6 +46,7 @@ class ContentManager {
       }
 
       const articles = await response.json();
+      console.log(articles);
 
       // Ensure articles is an array
       if (!Array.isArray(articles)) {
