@@ -161,7 +161,7 @@ class ContentManager {
       const img = document.createElement("img");
       img.src = imageUrl;
       img.alt = article.title || "Article image";
-      img.style.cursor = "pointer";
+      img.loading = "lazy";
       link.appendChild(img);
     } else if (article.description) {
       const description = document.createElement("p");
