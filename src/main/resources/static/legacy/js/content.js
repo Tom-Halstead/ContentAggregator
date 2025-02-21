@@ -13,13 +13,26 @@ class ContentManager {
     );
 
     // Fetch the initial user news sources and display random news on DOM load
-    this.fetchRandomNews();
+    this.waitForAccessToken();
+  }
+
+  // Check for access_token in intervals in order to correctly load data without requiring the user to manually reload the page
+
+  waitForAccessToken() {
+    const interval = setInterval(() => {
+      const accessToken = localStorage.getItem("access_token");
+
+      if (accessToken) {
+        clearInterval(interval);
+        this.fetchWorldNews();
+      }
+    }, 500);
   }
 
   /**
    * Fetches random news articles from the back-end API and updates the DOM.
    */
-  async fetchRandomNews() {
+  async fetchWorldNews() {
     try {
       const accessToken = localStorage.getItem("access_token");
 
@@ -57,7 +70,7 @@ class ContentManager {
       this.clearNewsContainers();
 
       // Add all articles to all categories (no filtering by category)
-      this.addArticlesToCategory(articles);
+      this.addNewsArticlesToCategory(articles);
     } catch (error) {
       console.error("Error fetching articles:", error.message);
     }
@@ -107,13 +120,9 @@ class ContentManager {
    * Adds all articles to each category container.
    * @param {Array} articles The articles data
    */
-  addArticlesToCategory(articles) {
-    articles.forEach((article) => {
+  addNewsArticlesToCategory(articles) {
+    articles.slice(0, 5).forEach((article) => {
       const row = this.createRowElement(article);
-
-      // Append the article to all category containers
-      // this.newsContainerReddit.appendChild(row);
-      // this.newsContainerLocal.appendChild(row.cloneNode(true)); // Use cloneNode to append the same article to multiple containers
       this.newsContainerWorld.appendChild(row.cloneNode(true));
     });
   }
@@ -127,30 +136,32 @@ class ContentManager {
     const row = document.createElement("div");
     row.classList.add("row");
 
-    // Create and append the article title
+    // ✅ Wrap the entire row inside an anchor tag to make everything clickable
+    const link = document.createElement("a");
+    link.href = article.url;
+    link.target = "_blank"; // Open in a new tab
+    link.style.textDecoration = "none"; // Optional: remove underline from the title
+    link.style.color = "inherit"; // Optional: preserve original text color
+
+    // Create and append the article title inside the link
     const title = document.createElement("h3");
     title.textContent = article.title;
-    row.appendChild(title);
+    link.appendChild(title);
 
-    // ✅ Create and append the article image using 'urlToImage'
+    // Create and append the clickable image or description inside the link
     if (article.urlToImage) {
       const img = document.createElement("img");
       img.src = article.urlToImage;
-      row.appendChild(img);
-    } else {
-      // Create and append the article description
+      img.alt = article.title;
+      img.style.cursor = "pointer";
+      link.appendChild(img);
+    } else if (article.description) {
       const description = document.createElement("p");
       description.textContent = article.description;
-      row.appendChild(description);
+      link.appendChild(description);
     }
 
-    // Create and append the "Read More" link
-    const link = document.createElement("a");
-    link.href = article.url;
-    link.textContent = "Read More";
-    link.target = "_blank"; // Open link in a new tab
-    row.appendChild(link);
-
+    row.appendChild(link); // Append the link (containing all elements) to the row
     return row;
   }
 }

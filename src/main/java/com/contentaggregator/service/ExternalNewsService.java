@@ -97,9 +97,11 @@ public class ExternalNewsService {
             }
         }
 
+
+        String userLanguageCode = Locale.getDefault().getLanguage();
         // Add common parameters
-        apiUrl.append("language=").append(language != null ? language : "en")
-                .append("&pageSize=").append(pageSize > 0 ? pageSize : 10)
+        apiUrl.append("language=").append(language != null ? language : userLanguageCode)
+                .append("&pageSize=").append(pageSize > 0 ? pageSize : 5)
                 .append("&page=").append(page > 0 ? page : 1)
                 .append("&apiKey=").append(getNEWS_API_KEY());
 

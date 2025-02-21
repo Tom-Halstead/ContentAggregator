@@ -46,6 +46,11 @@ header {
   width: 100%;
 }
 
+.main-nav a {
+  padding: 10px;
+  margin: 10px;
+}
+
 .shared-gradient {
   background: linear-gradient(
     var(--gradient-direction, to bottom),
