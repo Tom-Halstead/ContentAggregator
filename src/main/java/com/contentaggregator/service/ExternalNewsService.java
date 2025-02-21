@@ -74,7 +74,7 @@ public class ExternalNewsService {
     }
 
     public List<NewsArticleDTO> fetchArticles(
-            String source, String category, String query,
+            String category, String query,
             String language, String sortBy, int pageSize, int page
     ) {
         StringBuilder apiUrl;
@@ -88,9 +88,6 @@ public class ExternalNewsService {
             apiUrl = new StringBuilder("https://newsapi.org/v2/everything?");
             if (query != null && !query.isEmpty()) {
                 apiUrl.append("q=").append(URLEncoder.encode(query, StandardCharsets.UTF_8)).append("&");
-            }
-            if (source != null && !source.isEmpty()) {
-                apiUrl.append("sources=").append(source).append("&");
             }
             if (sortBy != null && !sortBy.isEmpty()) {
                 apiUrl.append("sortBy=").append(sortBy).append("&");
@@ -114,8 +111,7 @@ public class ExternalNewsService {
     private List<NewsArticleDTO> fetchArticlesFromApi(String baseUrl, Map<String, String> userParams) {
         try {
             // Check if any of the required parameters are missing, and set a default if necessary
-            if (!userParams.containsKey("q") && !userParams.containsKey("qInTitle") &&
-                    !userParams.containsKey("sources") && !userParams.containsKey("domains")) {
+            if (!userParams.containsKey("q") && !userParams.containsKey("qInTitle") && !userParams.containsKey("domains")) {
                 // If no required parameter is provided, set a default 'q' parameter
                 userParams.put("q", "latest");  // Example default, change as needed
             }

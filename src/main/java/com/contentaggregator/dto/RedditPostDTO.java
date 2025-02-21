@@ -20,11 +20,11 @@ public class RedditPostDTO {
     @JsonProperty("permalink")
     private String permalink;
 
+    private String fullPostUrl;
+
     @JsonProperty("thumbnail")
     private String thumbnail;
 
-    @JsonProperty("url_overridden_by_dest")
-    private String imageUrl;
 
     /**
      * Returns the full Reddit post URL by appending the permalink to the base URL.
@@ -36,8 +36,8 @@ public class RedditPostDTO {
     /**
      * Returns the preferred image URL (imageUrl if available, otherwise thumbnail).
      */
-    public String getPreferredImageUrl() {
-        return imageUrl != null && !imageUrl.isEmpty() ? imageUrl : thumbnail;
-    }
+//    public String getPreferredImageUrl() {
+//        return imageUrl != null && !imageUrl.isEmpty() ? imageUrl : thumbnail;
+//    }
 
 }

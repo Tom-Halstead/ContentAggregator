@@ -62,11 +62,10 @@ public class ExternalNewsController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String query,
             @RequestParam(required = false, defaultValue = "en") String language,
-            @RequestParam(required = false, defaultValue = "publishedAt") String sortBy,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestParam(required = false, defaultValue = "1") int page
     ) {
-        List<NewsArticleDTO> articles = externalNewsService.fetchArticles(source, category, query, language, sortBy, pageSize, page);
+        List<NewsArticleDTO> articles = externalNewsService.fetchArticles(source, category, query, language, pageSize, page);
         return ResponseEntity.ok(articles);
     }
 }

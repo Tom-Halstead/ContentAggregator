@@ -29,7 +29,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-x: hidden;
+  /* overflow-x: hidden; */
 }
 
 header {
@@ -148,6 +148,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: fit-content;
 }
 
 article {
@@ -251,7 +252,7 @@ footer {
     }
 
     article {
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       height: 100%;
     }

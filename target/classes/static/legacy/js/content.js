@@ -2,6 +2,7 @@
 
 class ContentManager {
   constructor() {
+    // Select containers using data attributes
     this.newsContainerReddit = document.querySelector(
       '[data-category="Reddit"] .news-container'
     );
@@ -12,34 +13,33 @@ class ContentManager {
       '[data-category="World"] .news-container'
     );
 
-    // Fetch the initial user news sources and display random news on DOM load
+    // Wait for access token and fetch news on DOM load
     this.waitForAccessToken();
   }
 
-  // Check for access_token in intervals in order to correctly load data without requiring the user to manually reload the page
-
+  /**
+   * Polls localStorage for the access token and fetches articles upon detection.
+   */
   waitForAccessToken() {
     const interval = setInterval(() => {
       const accessToken = localStorage.getItem("access_token");
 
       if (accessToken) {
-        clearInterval(interval);
         this.fetchWorldNews();
+        this.fetchRedditStories(); // Fetch Reddit stories after login
+        clearInterval(interval);
       }
-    }, 500);
+    }, 500); // Check every 500ms
   }
 
   /**
-   * Fetches random news articles from the back-end API and updates the DOM.
+   * Fetches world news articles from the backend and updates the DOM.
    */
   async fetchWorldNews() {
     try {
       const accessToken = localStorage.getItem("access_token");
-
-      // Check if the access token is present
-      if (!accessToken) {
+      if (!accessToken)
         throw new Error("Access token not found. Please log in.");
-      }
 
       const response = await fetch("http://localhost:8080/api/news/articles", {
         method: "GET",
@@ -49,58 +49,75 @@ class ContentManager {
         },
       });
 
-      // Handle unauthorized access (401 error)
-      if (response.status === 401) {
-        throw new Error("Unauthorized. Please log in to access the articles.");
-      }
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`Failed to fetch articles. Status: ${response.status}`);
-      }
 
       const articles = await response.json();
-      console.log(articles);
-
-      // Ensure articles is an array
-      if (!Array.isArray(articles)) {
+      if (!Array.isArray(articles))
         throw new Error("Invalid data format: Expected an array of articles.");
-      }
 
-      // Clear current articles before adding new ones
-      this.clearNewsContainers();
+      this.clearContainers(); // Clear previous articles
 
-      // Add all articles to all categories (no filtering by category)
-      this.addNewsArticlesToCategory(articles);
-    } catch (error) {
-      console.error("Error fetching articles:", error.message);
-    }
-  }
-
-  async fetchRedditStories() {
-    try {
-      const response = await fetch(
-        "https://www.reddit.com/r/wtf/top.json?t=day&limit=5"
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      console.log(data);
-      data.data.children.forEach((post) => {
-        console.log(`Title: ${post.data.title}, Upvotes: ${post.data.ups}`);
+      // Add each article to the World news container
+      articles.slice(0, 5).forEach((article) => {
+        const row = this.createArticleElement(
+          article,
+          article.urlToImage,
+          article.url
+        );
+        this.newsContainerWorld.appendChild(row);
       });
     } catch (error) {
-      console.error("Error fetching Reddit stories:", error);
+      console.error("Error fetching world news:", error.message);
     }
   }
 
   /**
-   * Clears all news containers before adding new content.
+   * Fetches Reddit stories from the backend and updates the DOM.
    */
-  clearNewsContainers() {
-    // Remove all child nodes from each container using removeChild
+  async fetchRedditStories() {
+    try {
+      const accessToken = localStorage.getItem("access_token");
+      if (!accessToken)
+        throw new Error("Access token not found. Please log in.");
+
+      const response = await fetch("http://localhost:8080/api/reddit/posts", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok)
+        throw new Error(
+          `Failed to fetch Reddit stories. Status: ${response.status}`
+        );
+
+      const posts = await response.json();
+      if (!Array.isArray(posts))
+        throw new Error(
+          "Invalid data format: Expected an array of Reddit posts."
+        );
+
+      posts.forEach((post) => {
+        console.log(post);
+        const row = this.createArticleElement(
+          post,
+          post.preferredImageUrl || post.thumbnail,
+          post.fullPostUrl || post.permalink
+        );
+        this.newsContainerReddit.appendChild(row);
+      });
+    } catch (error) {
+      console.error("Error fetching Reddit stories:", error.message);
+    }
+  }
+
+  /**
+   * Clears all news containers.
+   */
+  clearContainers() {
     this.removeAllChildren(this.newsContainerReddit);
     this.removeAllChildren(this.newsContainerLocal);
     this.removeAllChildren(this.newsContainerWorld);
@@ -108,7 +125,7 @@ class ContentManager {
 
   /**
    * Removes all child elements from a given container.
-   * @param {HTMLElement} container The container to clear
+   * @param {HTMLElement} container - The container to clear.
    */
   removeAllChildren(container) {
     while (container.firstChild) {
@@ -117,56 +134,48 @@ class ContentManager {
   }
 
   /**
-   * Adds all articles to each category container.
-   * @param {Array} articles The articles data
+   * Creates a DOM element representing an article or Reddit post.
+   * @param {Object} article - The article/post data.
+   * @param {string} imageUrl - URL to the image or thumbnail.
+   * @param {string} postUrl - URL to the full article/post.
+   * @returns {HTMLElement} - The created row element.
    */
-  addNewsArticlesToCategory(articles) {
-    articles.slice(0, 5).forEach((article) => {
-      const row = this.createRowElement(article);
-      this.newsContainerWorld.appendChild(row.cloneNode(true));
-    });
-  }
-
-  /**
-   * Creates a DOM element for a row with article data.
-   * @param {Object} article The article data
-   * @returns {HTMLElement} The created row DOM element
-   */
-  createRowElement(article) {
+  createArticleElement(article, imageUrl, postUrl) {
     const row = document.createElement("div");
     row.classList.add("row");
 
-    // ✅ Wrap the entire row inside an anchor tag to make everything clickable
+    // Create clickable link wrapping the entire content
     const link = document.createElement("a");
-    link.href = article.url;
-    link.target = "_blank"; // Open in a new tab
-    link.style.textDecoration = "none"; // Optional: remove underline from the title
-    link.style.color = "inherit"; // Optional: preserve original text color
+    link.href = postUrl || "#";
+    link.target = "_blank";
+    link.style.textDecoration = "none";
+    link.style.color = "inherit";
 
-    // Create and append the article title inside the link
+    // Article title
     const title = document.createElement("h3");
-    title.textContent = article.title;
+    title.textContent = article.title || "No Title";
     link.appendChild(title);
 
-    // Create and append the clickable image or description inside the link
-    if (article.urlToImage) {
+    // Image or description
+    if (imageUrl) {
       const img = document.createElement("img");
-      img.src = article.urlToImage;
-      img.alt = article.title;
+      img.src = imageUrl;
+      img.alt = article.title || "Article image";
       img.style.cursor = "pointer";
       link.appendChild(img);
     } else if (article.description) {
       const description = document.createElement("p");
       description.textContent = article.description;
+      description.style.fontFamily = "Times New Roman, Times, serif";
       link.appendChild(description);
     }
 
-    row.appendChild(link); // Append the link (containing all elements) to the row
+    row.appendChild(link); // Add link to the row
     return row;
   }
 }
 
-// Initialize the ContentManager object
+// Initialize ContentManager on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   new ContentManager();
 });
