@@ -143,15 +143,41 @@ class AuthManager {
   updateUI(isLoggedIn, user = null) {
     console.log("Updating UI. User logged in:", isLoggedIn);
 
-    // Capitalize first letter of the username
+    // Format username if available
     const formattedUsername = user?.username
       ? user.username.charAt(0).toUpperCase() + user.username.slice(1)
-      : "User";
+      : null;
 
+    // Update authentication button text
     this.authBtn.innerText = isLoggedIn ? "Logout" : "Login/Register";
-    this.authTitle.innerText = isLoggedIn
-      ? `Hello, ${formattedUsername}!`
-      : "Welcome!";
+
+    // Update the greeting title with the welcome message
+    this.displayWelcomeMessage(formattedUsername);
+  }
+
+  /**
+   * Displays a welcome message based on the time of day.
+   * If a user is logged in, their name is included.
+   */
+  displayWelcomeMessage(username = null) {
+    const hour = new Date().getHours();
+    let message = "Hope you're having a great night, "; // Default neutral night-time message
+
+    if (hour >= 5 && hour < 12) {
+      message = "Good morning, ";
+    } else if (hour >= 12 && hour < 18) {
+      message = "Good afternoon, ";
+    } else if (hour >= 18 && hour < 22) {
+      message = "Good evening, ";
+    }
+
+    // Append username if available
+    if (username) {
+      message += ` ${username}!`;
+    }
+
+    // Update the welcome message in the UI
+    this.authTitle.innerText = message;
   }
 
   /**
@@ -160,6 +186,7 @@ class AuthManager {
   logout() {
     console.log("Logging out...");
     this.clearSession();
+    this.authTitle.innerText = "Welcome!";
 
     // ✅ Use "localhost" instead of "127.0.0.1"
     const logoutUrl = `https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com/logout?client_id=5oncoq9mddhbmluooq6kpib2kj&logout_uri=${encodeURIComponent(

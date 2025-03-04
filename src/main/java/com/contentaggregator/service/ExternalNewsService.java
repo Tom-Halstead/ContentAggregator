@@ -1,6 +1,8 @@
 package com.contentaggregator.service;
 
 import com.contentaggregator.dto.NewsArticleDTO;
+import com.contentaggregator.exception.InvalidNewsRequestException;
+import com.contentaggregator.exception.NewsApiException;
 import com.contentaggregator.response.NewsApiResponse;
 import lombok.Getter;
 import org.apache.http.client.utils.URIBuilder;
@@ -110,13 +112,13 @@ public class ExternalNewsService {
      */
     private List<NewsArticleDTO> fetchArticlesFromApi(String baseUrl, Map<String, String> userParams) {
         try {
-            // Check if any of the required parameters are missing, and set a default if necessary
+            // Ensure at least one search parameter is provided
             if (!userParams.containsKey("q") && !userParams.containsKey("qInTitle") && !userParams.containsKey("domains")) {
                 // If no required parameter is provided, set a default 'q' parameter
                 userParams.put("q", "latest");  // Example default, change as needed
             }
 
-            // Build the API URL with user parameters dynamically using URIBuilder
+            // Build the API URL dynamically using URIBuilder
             URIBuilder uriBuilder = new URIBuilder(baseUrl);
 
             // Add each user-defined parameter to the URI
@@ -148,15 +150,18 @@ public class ExternalNewsService {
                 List<NewsArticleDTO> articles = response.getBody().getArticles();
                 return articles != null ? articles : Collections.emptyList();
             } else {
-                throw new RuntimeException("Failed to fetch news articles from external API: " + response.getStatusCode());
+                throw new NewsApiException("Failed to fetch news articles. Status: " + response.getStatusCode());
             }
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             // Handle HTTP errors (e.g., 4xx or 5xx responses)
-            throw new RuntimeException("API call failed: " + e.getStatusCode());
+            throw new NewsApiException("API request failed with status: " + e.getStatusCode(), e);
+        } catch (InvalidNewsRequestException e) {
+            // Pass through the exception for global handling
+            throw e;
         } catch (Exception e) {
             // Catch any other unexpected exceptions
-            throw new RuntimeException("An error occurred while fetching news articles", e);
+            throw new NewsApiException("An unexpected error occurred while fetching news articles.", e);
         }
     }
 

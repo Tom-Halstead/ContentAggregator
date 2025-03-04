@@ -167,6 +167,7 @@ class ContentManager {
       const description = document.createElement("p");
       description.textContent = article.description;
       description.style.fontFamily = "Noto Sans Display, sans, serif";
+      description.style.lineHeight = "22px";
       link.appendChild(description);
     }
 

@@ -57,7 +57,7 @@ public class RedditService {
      */
     public List<RedditPostDTO> fetchPostsFromApi(URI uri) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.USER_AGENT, "ContentAggregatorApp/1.0"); // Reddit requires a User-Agent
+        headers.set(HttpHeaders.USER_AGENT, "ContentAggregatorApp/1.0");
 
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
@@ -66,7 +66,6 @@ public class RedditService {
                     uri, HttpMethod.GET, requestEntity, JsonNode.class
             );
 
-            // If the response is successful and contains valid data
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 JsonNode children = response.getBody().path("data").path("children");
 
@@ -81,7 +80,6 @@ public class RedditService {
                 }
             }
 
-            // If response is not successful, throw an exception
             throw new RedditApiException("Failed to fetch Reddit posts. Status: " + response.getStatusCode());
 
         } catch (HttpClientErrorException e) {
