@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExternalNewsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Content Aggregator</a> &gt; <a href="index.source.html" class="el_package">com.contentaggregator.service</a> &gt; <span class="el_source">ExternalNewsService.java</span></div><h1>ExternalNewsService.java</h1><pre class="source lang-java linenums">package com.contentaggregator.service;
+
+import com.contentaggregator.dto.NewsArticleDTO;
+import com.contentaggregator.exception.InvalidNewsRequestException;
+import com.contentaggregator.exception.NewsApiException;
+import com.contentaggregator.response.NewsApiResponse;
+import lombok.Getter;
+import org.apache.http.client.utils.URIBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+@Getter
+@Service
+public class ExternalNewsService {
+
+<span class="nc" id="L29">    private final RestTemplate restTemplate;</span>
+
+<span class="nc" id="L31">    private final String NEWS_API_KEY;</span>
+
+    @Autowired
+<span class="nc" id="L34">    public ExternalNewsService(RestTemplate restTemplate, @Value(&quot;${news.api.key}&quot;) String NEWS_API_KEY) {</span>
+<span class="nc" id="L35">        this.restTemplate = restTemplate;</span>
+<span class="nc" id="L36">        this.NEWS_API_KEY = NEWS_API_KEY;</span>
+<span class="nc" id="L37">    }</span>
+
+    /**
+     * Fetch articles by source and category.
+     */
+    public List&lt;NewsArticleDTO&gt; fetchArticlesBySource(String apiType, String category) {
+<span class="nc" id="L43">        Map&lt;String, String&gt; userParams = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L44">        userParams.put(&quot;q&quot;, category); // You can modify or add more params based on user preferences</span>
+<span class="nc" id="L45">        userParams.put(&quot;sources&quot;, apiType); // The source defined by the user</span>
+
+<span class="nc" id="L47">        return fetchArticlesFromApi(&quot;https://newsapi.org/v2/everything&quot;, userParams);</span>
+    }
+
+    /**
+     * Fetch articles by category (uses top-headlines endpoint).
+     */
+    public List&lt;NewsArticleDTO&gt; fetchArticlesByCategory(String category) {
+<span class="nc" id="L54">        Map&lt;String, String&gt; userParams = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L55">        userParams.put(&quot;category&quot;, category);</span>
+
+<span class="nc" id="L57">        return fetchArticlesFromApi(&quot;https://newsapi.org/v2/top-headlines&quot;, userParams);</span>
+    }
+
+    /**
+     * Fetch articles based on a user's preferred sources.
+     */
+    public List&lt;NewsArticleDTO&gt; fetchArticlesByUserPreferences(int userId) {
+        // Replace with actual repository call to fetch preferred sources for the user
+<span class="nc" id="L65">        List&lt;String&gt; userPreferredSources = List.of(&quot;techcrunch&quot;, &quot;bbc-news&quot;);</span>
+
+<span class="nc" id="L67">        List&lt;NewsArticleDTO&gt; aggregatedArticles = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        for (String source : userPreferredSources) {</span>
+<span class="nc" id="L69">            Map&lt;String, String&gt; userParams = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L70">            userParams.put(&quot;sources&quot;, source); // User's preferred source</span>
+
+            // Fetch articles from each preferred source
+<span class="nc" id="L73">            aggregatedArticles.addAll(fetchArticlesFromApi(&quot;https://newsapi.org/v2/everything&quot;, userParams));</span>
+<span class="nc" id="L74">        }</span>
+<span class="nc" id="L75">        return aggregatedArticles;</span>
+    }
+
+    public List&lt;NewsArticleDTO&gt; fetchArticles(
+            String category, String query,
+            String language, String sortBy, int pageSize, int page
+    ) {
+        StringBuilder apiUrl;
+
+<span class="nc bnc" id="L84" title="All 4 branches missed.">        if (category != null &amp;&amp; !category.isEmpty()) {</span>
+            // Use /top-headlines when category is specified
+<span class="nc" id="L86">            apiUrl = new StringBuilder(&quot;https://newsapi.org/v2/top-headlines?&quot;);</span>
+<span class="nc" id="L87">            apiUrl.append(&quot;category=&quot;).append(URLEncoder.encode(category, StandardCharsets.UTF_8)).append(&quot;&amp;&quot;);</span>
+        } else {
+            // Use /everything when category is not provided
+<span class="nc" id="L90">            apiUrl = new StringBuilder(&quot;https://newsapi.org/v2/everything?&quot;);</span>
+<span class="nc bnc" id="L91" title="All 4 branches missed.">            if (query != null &amp;&amp; !query.isEmpty()) {</span>
+<span class="nc" id="L92">                apiUrl.append(&quot;q=&quot;).append(URLEncoder.encode(query, StandardCharsets.UTF_8)).append(&quot;&amp;&quot;);</span>
+            }
+<span class="nc bnc" id="L94" title="All 4 branches missed.">            if (sortBy != null &amp;&amp; !sortBy.isEmpty()) {</span>
+<span class="nc" id="L95">                apiUrl.append(&quot;sortBy=&quot;).append(sortBy).append(&quot;&amp;&quot;);</span>
+            }
+        }
+
+
+<span class="nc" id="L100">        String userLanguageCode = Locale.getDefault().getLanguage();</span>
+        // Add common parameters
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        apiUrl.append(&quot;language=&quot;).append(language != null ? language : userLanguageCode)</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                .append(&quot;&amp;pageSize=&quot;).append(pageSize &gt; 0 ? pageSize : 5)</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                .append(&quot;&amp;page=&quot;).append(page &gt; 0 ? page : 1)</span>
+<span class="nc" id="L105">                .append(&quot;&amp;apiKey=&quot;).append(getNEWS_API_KEY());</span>
+
+<span class="nc" id="L107">        return fetchArticlesFromApi(apiUrl.toString(), new HashMap&lt;&gt;());  // Passing empty map or any other params</span>
+    }
+
+    /**
+     * Handles the actual API call and maps the response to a list of NewsArticleDTO.
+     */
+    private List&lt;NewsArticleDTO&gt; fetchArticlesFromApi(String baseUrl, Map&lt;String, String&gt; userParams) {
+        try {
+            // Ensure at least one search parameter is provided
+<span class="nc bnc" id="L116" title="All 6 branches missed.">            if (!userParams.containsKey(&quot;q&quot;) &amp;&amp; !userParams.containsKey(&quot;qInTitle&quot;) &amp;&amp; !userParams.containsKey(&quot;domains&quot;)) {</span>
+                // If no required parameter is provided, set a default 'q' parameter
+<span class="nc" id="L118">                userParams.put(&quot;q&quot;, &quot;latest&quot;);  // Example default, change as needed</span>
+            }
+
+            // Build the API URL dynamically using URIBuilder
+<span class="nc" id="L122">            URIBuilder uriBuilder = new URIBuilder(baseUrl);</span>
+
+            // Add each user-defined parameter to the URI
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            for (Map.Entry&lt;String, String&gt; param : userParams.entrySet()) {</span>
+<span class="nc" id="L126">                uriBuilder.addParameter(param.getKey(), param.getValue());</span>
+<span class="nc" id="L127">            }</span>
+
+            // Check if the API key is already appended to the URL
+<span class="nc" id="L130">            String apiUrl = uriBuilder.toString();</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">            if (!apiUrl.contains(&quot;apiKey=&quot;)) {</span>
+                // Append the API key if not already present
+<span class="nc" id="L133">                uriBuilder.addParameter(&quot;apiKey&quot;, getNEWS_API_KEY());</span>
+            }
+
+            // Build the URI from the URIBuilder
+<span class="nc" id="L137">            URI uri = uriBuilder.build();</span>
+
+            // Set up headers
+<span class="nc" id="L140">            HttpHeaders headers = new HttpHeaders();</span>
+
+            // Set up HTTP request entity
+<span class="nc" id="L143">            HttpEntity&lt;String&gt; entity = new HttpEntity&lt;&gt;(headers);</span>
+
+            // Use RestTemplate to send the GET request
+<span class="nc" id="L146">            ResponseEntity&lt;NewsApiResponse&gt; response = restTemplate.exchange(uri, HttpMethod.GET, entity, NewsApiResponse.class);</span>
+
+            // Check if the response is successful
+<span class="nc bnc" id="L149" title="All 4 branches missed.">            if (response.getStatusCode().is2xxSuccessful() &amp;&amp; response.getBody() != null) {</span>
+<span class="nc" id="L150">                List&lt;NewsArticleDTO&gt; articles = response.getBody().getArticles();</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                return articles != null ? articles : Collections.emptyList();</span>
+            } else {
+<span class="nc" id="L153">                throw new NewsApiException(&quot;Failed to fetch news articles. Status: &quot; + response.getStatusCode());</span>
+            }
+
+<span class="nc" id="L156">        } catch (HttpClientErrorException | HttpServerErrorException e) {</span>
+            // Handle HTTP errors (e.g., 4xx or 5xx responses)
+<span class="nc" id="L158">            throw new NewsApiException(&quot;API request failed with status: &quot; + e.getStatusCode(), e);</span>
+<span class="nc" id="L159">        } catch (InvalidNewsRequestException e) {</span>
+            // Pass through the exception for global handling
+<span class="nc" id="L161">            throw e;</span>
+<span class="nc" id="L162">        } catch (Exception e) {</span>
+            // Catch any other unexpected exceptions
+<span class="nc" id="L164">            throw new NewsApiException(&quot;An unexpected error occurred while fetching news articles.&quot;, e);</span>
+        }
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

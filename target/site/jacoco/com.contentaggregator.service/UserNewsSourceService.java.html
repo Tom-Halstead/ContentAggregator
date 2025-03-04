@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserNewsSourceService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Content Aggregator</a> &gt; <a href="index.source.html" class="el_package">com.contentaggregator.service</a> &gt; <span class="el_source">UserNewsSourceService.java</span></div><h1>UserNewsSourceService.java</h1><pre class="source lang-java linenums">package com.contentaggregator.service;
+
+import com.contentaggregator.exception.ResourceNotFoundException;
+import com.contentaggregator.model.NewsSource;
+import com.contentaggregator.model.User;
+import com.contentaggregator.model.UserNewsSource;
+import com.contentaggregator.repository.NewsSourceRepository;
+import com.contentaggregator.repository.UserNewsSourceRepository;
+import com.contentaggregator.repository.UserRepository;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class UserNewsSourceService {
+    private final UserNewsSourceRepository userNewsSourceRepository;
+    private final UserRepository userRepository;
+    private final NewsSourceRepository newsSourceRepository;
+
+<span class="fc" id="L21">    public UserNewsSourceService(UserNewsSourceRepository userNewsSourceRepository, UserRepository userRepository, NewsSourceRepository newsSourceRepository) {</span>
+<span class="fc" id="L22">        this.userNewsSourceRepository = userNewsSourceRepository;</span>
+<span class="fc" id="L23">        this.userRepository = userRepository;</span>
+<span class="fc" id="L24">        this.newsSourceRepository = newsSourceRepository;</span>
+<span class="fc" id="L25">    }</span>
+
+    /**
+     * Fetches a list of news sources associated with a user.
+     *
+     * @param userId The ID of the user.
+     * @return List of UserNewsSource objects.
+     * @throws ResourceNotFoundException if the user does not exist.
+     */
+    public List&lt;UserNewsSource&gt; getUserSources(int userId) {
+<span class="fc" id="L35">        User user = userRepository.findById(userId)</span>
+<span class="fc" id="L36">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User not found with ID: &quot; + userId));</span>
+
+<span class="fc" id="L38">        return userNewsSourceRepository.findByUser(user);</span>
+    }
+
+    /**
+     * Adds a new news source for a user.
+     *
+     * @param userId       The ID of the user.
+     * @param sourceId     The ID of the news source.
+     * @param customParams Any custom parameters for the user-specific source configuration.
+     * @throws ResourceNotFoundException if the user or news source does not exist.
+     */
+    public void addUserSource(int userId, int sourceId, String customParams) {
+<span class="fc" id="L50">        User user = userRepository.findById(userId)</span>
+<span class="fc" id="L51">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User not found with ID: &quot; + userId));</span>
+
+<span class="fc" id="L53">        NewsSource newsSource = newsSourceRepository.findById(sourceId)</span>
+<span class="fc" id="L54">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;News source not found with ID: &quot; + sourceId));</span>
+
+<span class="fc" id="L56">        UserNewsSource userNewsSource = new UserNewsSource(user, newsSource, customParams, LocalDateTime.now());</span>
+
+        try {
+<span class="fc" id="L59">            userNewsSourceRepository.save(userNewsSource);</span>
+<span class="nc" id="L60">        } catch (Exception e) {</span>
+<span class="nc" id="L61">            throw new RuntimeException(&quot;Failed to save user news source&quot;, e);</span>
+<span class="fc" id="L62">        }</span>
+<span class="fc" id="L63">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

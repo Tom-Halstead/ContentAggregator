@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Content Aggregator</a> &gt; <a href="index.source.html" class="el_package">com.contentaggregator.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.contentaggregator.model;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;\&quot;user\&quot;&quot;)
+public class User {
+
+<span class="fc" id="L11">    public User() {</span>
+<span class="fc" id="L12">    }</span>
+
+    ;
+
+<span class="nc" id="L16">    public User(String username, String email, String cognitoUuid, int userId) {</span>
+<span class="nc" id="L17">        this.username = username;</span>
+<span class="nc" id="L18">        this.cognitoUuid = cognitoUuid;</span>
+<span class="nc" id="L19">        this.email = email;</span>
+<span class="nc" id="L20">    }</span>
+
+<span class="nc" id="L22">    public User(String username, String email, String cognitoUuid) {</span>
+<span class="nc" id="L23">        this.username = username;</span>
+<span class="nc" id="L24">        this.email = email;</span>
+<span class="nc" id="L25">        this.cognitoUuid = cognitoUuid;</span>
+<span class="nc" id="L26">        this.createdAt = LocalDateTime.now();</span>
+<span class="nc" id="L27">        this.lastLogin = LocalDateTime.now();</span>
+<span class="nc" id="L28">    }</span>
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = &quot;user_id&quot;)
+    private int userId;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime lastLogin;
+
+    @Column(nullable = false, unique = true)
+    private String cognitoUuid;
+
+
+    public int getUserId() {
+<span class="fc" id="L52">        return userId;</span>
+    }
+
+
+    public void setUserId(int userId) {
+<span class="fc" id="L57">        this.userId = userId;</span>
+<span class="fc" id="L58">    }</span>
+
+    public String getCognitoUuid() {
+<span class="nc" id="L61">        return cognitoUuid;</span>
+    }
+
+    public void setCognitoUuid(String cognitoUuid) {
+<span class="nc" id="L65">        this.cognitoUuid = cognitoUuid;</span>
+<span class="nc" id="L66">    }</span>
+
+    public String getUsername() {
+<span class="nc" id="L69">        return username;</span>
+    }
+
+    public void setUsername(String username) {
+<span class="fc" id="L73">        this.username = username;</span>
+<span class="fc" id="L74">    }</span>
+
+    public String getEmail() {
+<span class="nc" id="L77">        return email;</span>
+    }
+
+    public void setEmail(String email) {
+<span class="nc" id="L81">        this.email = email;</span>
+<span class="nc" id="L82">    }</span>
+
+    public LocalDateTime getCreatedAt() {
+<span class="nc" id="L85">        return createdAt;</span>
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="nc" id="L89">        this.createdAt = createdAt;</span>
+<span class="nc" id="L90">    }</span>
+
+    public LocalDateTime getLastLogin() {
+<span class="nc" id="L93">        return lastLogin;</span>
+    }
+
+    public void setLastLogin(LocalDateTime lastLogin) {
+<span class="nc" id="L97">        this.lastLogin = lastLogin;</span>
+<span class="nc" id="L98">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

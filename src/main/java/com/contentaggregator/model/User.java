@@ -8,7 +8,10 @@ import java.time.LocalDateTime;
 @Table(name = "\"user\"")
 public class User {
 
-    public User(){};
+    public User() {
+    }
+
+    ;
 
     public User(String username, String email, String cognitoUuid, int userId) {
         this.username = username;
@@ -48,6 +51,7 @@ public class User {
     public int getUserId() {
         return userId;
     }
+
 
     public void setUserId(int userId) {
         this.userId = userId;

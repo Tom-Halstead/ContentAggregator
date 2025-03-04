@@ -58,8 +58,13 @@ class ContentManager {
 
       this.clearContainers(); // Clear previous articles
 
-      // Add each article to the World news container
-      articles.slice(0, 5).forEach((article) => {
+      // Filter out articles without images and limit to 5 articles
+      const validArticles = articles
+        .filter((article) => article.urlToImage)
+        .slice(0, 5);
+
+      // Add each valid article to the World news container
+      validArticles.forEach((article) => {
         const row = this.createArticleElement(
           article,
           article.urlToImage,
@@ -163,13 +168,14 @@ class ContentManager {
       img.alt = article.title || "Article image";
       img.loading = "lazy";
       link.appendChild(img);
-    } else if (article.description) {
-      const description = document.createElement("p");
-      description.textContent = article.description;
-      description.style.fontFamily = "Noto Sans Display, sans, serif";
-      description.style.lineHeight = "22px";
-      link.appendChild(description);
     }
+    // else if (article.description) {
+    //   const description = document.createElement("p");
+    //   description.textContent = article.description;
+    //   description.style.fontFamily = "Noto Sans Display, sans, serif";
+    //   description.style.lineHeight = "22px";
+    //   link.appendChild(description);
+    // }
 
     row.appendChild(link); // Add link to the row
     return row;

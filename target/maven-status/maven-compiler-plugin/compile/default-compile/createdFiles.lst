@@ -5,7 +5,6 @@ com\contentaggregator\service\UserNewsSourceService.class
 com\contentaggregator\controller\NewsSourceController.class
 com\contentaggregator\controller\AuthController.class
 com\contentaggregator\model\UserNewsSourceId.class
-com\contentaggregator\dto\NewsSourceDTO.class
 com\contentaggregator\repository\UserRepository.class
 com\contentaggregator\controller\ExternalNewsController.class
 com\contentaggregator\controller\UserNewsSourceController.class

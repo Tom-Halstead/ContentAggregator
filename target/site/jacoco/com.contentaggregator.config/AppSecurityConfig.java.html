@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppSecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Content Aggregator</a> &gt; <a href="index.source.html" class="el_package">com.contentaggregator.config</a> &gt; <span class="el_source">AppSecurityConfig.java</span></div><h1>AppSecurityConfig.java</h1><pre class="source lang-java linenums">package com.contentaggregator.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.AuthenticatedPrincipalOAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Arrays;
+
+@Configuration
+@EnableWebSecurity
+<span class="nc" id="L29">public class AppSecurityConfig implements WebMvcConfigurer {</span>
+
+    // ✅ Cognito Properties
+    @Value(&quot;${CONTENT_AGGREGATOR_COGNITO_CLIENT_ID}&quot;)
+    private String clientId;
+
+    @Value(&quot;${CONTENT_AGGREGATOR_COGNITO_SECRET_KEY}&quot;)
+    private String secretKey;
+
+    @Value(&quot;${spring.security.oauth2.client.provider.cognito.issuer-uri}&quot;)
+    private String issuerUrl;
+
+    @Value(&quot;${spring.security.oauth2.client.registration.cognito.redirect-uri}&quot;)
+    private String redirectUri;
+
+    @Value(&quot;${aws.cognito.domain}&quot;)
+    private String domain;
+
+<span class="nc" id="L47">    private String scope = &quot;profile email openid&quot;;</span>
+
+    public String getClientId() {
+<span class="nc" id="L50">        return clientId;</span>
+    }
+
+    public String getClientSecret() {
+<span class="nc" id="L54">        return secretKey;</span>
+    }
+
+    public String getIssuerUrl() {
+<span class="nc" id="L58">        return issuerUrl;</span>
+    }
+
+    public String getRedirectUri() {
+<span class="nc" id="L62">        return redirectUri;</span>
+    }
+
+    public String getScope() {
+<span class="nc" id="L66">        return scope;</span>
+    }
+
+    public void setScope(String scope) {
+<span class="nc" id="L70">        this.scope = scope;</span>
+<span class="nc" id="L71">    }</span>
+
+    public String getDomain() {
+<span class="nc" id="L74">        return domain;</span>
+    }
+
+    public void setDomain(String domain) {
+<span class="nc" id="L78">        this.domain = domain;</span>
+<span class="nc" id="L79">    }</span>
+
+    public String getTokenEndpoint() {
+<span class="nc" id="L82">        return this.issuerUrl + &quot;/oauth2/token&quot;;</span>
+    }
+
+    // ✅ Provide RestTemplate bean
+    @Bean
+    public RestTemplate restTemplate() {
+<span class="nc" id="L88">        return new RestTemplate();</span>
+    }
+
+    /**
+     * ✅ JWT Authentication Converter
+     */
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+<span class="nc" id="L96">        return new JwtAuthenticationConverter();</span>
+    }
+
+    /**
+     * ✅ OAuth2 Client Services
+     */
+    @Bean
+    public OAuth2AuthorizedClientService authorizedClientService(ClientRegistrationRepository clientRegistrationRepository) {
+<span class="nc" id="L104">        return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository);</span>
+    }
+
+    @Bean
+    public OAuth2AuthorizedClientRepository authorizedClientRepository(OAuth2AuthorizedClientService authorizedClientService) {
+<span class="nc" id="L109">        return new AuthenticatedPrincipalOAuth2AuthorizedClientRepository(authorizedClientService);</span>
+    }
+
+    /**
+     * ✅ Configures security filters including OAuth2 login
+     */
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, OAuth2AuthorizedClientRepository authorizedClientRepository) throws Exception {
+<span class="nc" id="L117">        http</span>
+<span class="nc" id="L118">                .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
+<span class="nc" id="L119">                .csrf().disable()</span>
+<span class="nc" id="L120">                .authorizeHttpRequests(authz -&gt; authz</span>
+<span class="nc" id="L121">                        .requestMatchers(HttpMethod.OPTIONS, &quot;/**&quot;).permitAll()</span>
+<span class="nc" id="L122">                        .requestMatchers(&quot;/&quot;, &quot;/index.html&quot;, &quot;/post-login&quot;, &quot;/user-info&quot;, &quot;/login/oauth2/code/**&quot;, &quot;/login-failed&quot;, &quot;/actuator/**&quot;).permitAll()</span>
+<span class="nc" id="L123">                        .anyRequest().authenticated()</span>
+                )
+<span class="nc" id="L125">                .oauth2Login(oauth2 -&gt; oauth2</span>
+<span class="nc" id="L126">                        .authorizedClientRepository(authorizedClientRepository)</span>
+<span class="nc" id="L127">                        .defaultSuccessUrl(&quot;/api/auth/post-login&quot;, true)</span>
+<span class="nc" id="L128">                        .failureUrl(&quot;/login-failed&quot;)</span>
+                )
+<span class="nc" id="L130">                .oauth2ResourceServer(oauth2 -&gt; oauth2.jwt())</span>
+<span class="nc" id="L131">                .sessionManagement(session -&gt; session</span>
+<span class="nc" id="L132">                        .sessionFixation().none() // ✅ Prevent session ID change after login</span>
+<span class="nc" id="L133">                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // ✅ Ensure session is maintained</span>
+                );
+
+<span class="nc" id="L136">        return http.build();</span>
+    }
+
+    /**
+     * ✅ CORS Configuration (Ensures Frontend Access)
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+<span class="nc" id="L144">        CorsConfiguration corsConfig = new CorsConfiguration();</span>
+<span class="nc" id="L145">        corsConfig.setAllowedOrigins(Arrays.asList(</span>
+                &quot;http://127.0.0.1:8080&quot;,
+                &quot;http://localhost:5500&quot;,
+                &quot;http://127.0.0.1:5500&quot;,
+                &quot;http://localhost:8080&quot;
+        )); // Add frontend domains
+<span class="nc" id="L151">        corsConfig.setAllowedMethods(Arrays.asList(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</span>
+<span class="nc" id="L152">        corsConfig.setAllowedHeaders(Arrays.asList(&quot;Authorization&quot;, &quot;Content-Type&quot;));</span>
+<span class="nc" id="L153">        corsConfig.setAllowCredentials(true);</span>
+
+<span class="nc" id="L155">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="nc" id="L156">        source.registerCorsConfiguration(&quot;/**&quot;, corsConfig);</span>
+<span class="nc" id="L157">        return source;</span>
+    }
+
+    /**
+     * ✅ MVC View Controllers
+     */
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+<span class="nc" id="L165">        registry.addViewController(&quot;/&quot;).setViewName(&quot;home&quot;);</span>
+<span class="nc" id="L166">    }</span>
+
+    /**
+     * ✅ CORS Configuration for MVC (Alternative for non-Spring Security routes)
+     */
+    @Override
+    public void addCorsMappings(org.springframework.web.servlet.config.annotation.CorsRegistry registry) {
+<span class="nc" id="L173">        registry.addMapping(&quot;/**&quot;)</span>
+<span class="nc" id="L174">                .allowedOrigins(&quot;http://localhost:5500&quot;, &quot;http://127.0.0.1:5500&quot;, &quot;http://localhost:8080&quot;, &quot;http://127.0.0.1:8080&quot;, &quot;http://localhost:8081&quot;)</span>
+<span class="nc" id="L175">                .allowedMethods(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;)</span>
+<span class="nc" id="L176">                .allowedHeaders(&quot;*&quot;)</span>
+<span class="nc" id="L177">                .allowCredentials(true);</span>
+<span class="nc" id="L178">    }</span>
+
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+<span class="nc" id="L183">        registry.addResourceHandler(&quot;/vue/**&quot;)</span>
+<span class="nc" id="L184">                .addResourceLocations(&quot;classpath:/static/vue/&quot;);</span>
+<span class="nc" id="L185">        registry.addResourceHandler(&quot;/legacy/**&quot;)</span>
+<span class="nc" id="L186">                .addResourceLocations(&quot;classpath:/static/legacy/&quot;);</span>
+<span class="nc" id="L187">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Content Aggregator</a> &gt; <a href="index.source.html" class="el_package">com.contentaggregator.controller</a> &gt; <span class="el_source">AuthController.java</span></div><h1>AuthController.java</h1><pre class="source lang-java linenums">package com.contentaggregator.controller;
+
+import com.contentaggregator.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/auth&quot;)
+public class AuthController {
+
+    private final OAuth2AuthorizedClientService authorizedClientService;
+
+    private final UserService userService;
+
+    // ✅ Inject OAuth2AuthorizedClientService properly
+    @Autowired
+<span class="nc" id="L29">    public AuthController(OAuth2AuthorizedClientService authorizedClientService, UserService userService) {</span>
+<span class="nc" id="L30">        this.authorizedClientService = authorizedClientService;</span>
+<span class="nc" id="L31">        this.userService = userService;</span>
+<span class="nc" id="L32">    }</span>
+
+//    @GetMapping(&quot;/post-login&quot;)
+//    public ResponseEntity&lt;Void&gt; postLogin(OAuth2AuthenticationToken authentication, HttpServletResponse response) {
+//        Map&lt;String, Object&gt; attributes = authentication.getPrincipal().getAttributes();
+//        System.out.println(&quot;User Attributes: &quot; + attributes);
+//
+//        // ✅ Fetch the authorized client and access token
+//        OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(
+//                authentication.getAuthorizedClientRegistrationId(),
+//                authentication.getName()
+//        );
+//
+//        String accessToken = (authorizedClient != null &amp;&amp; authorizedClient.getAccessToken() != null)
+//                ? authorizedClient.getAccessToken().getTokenValue()
+//                : &quot;no_access_token&quot;;
+//
+//        System.out.println(&quot;Access Token: &quot; + accessToken);
+//
+//        String username = attributes.get(&quot;username&quot;) != null ? attributes.get(&quot;username&quot;).toString() : &quot;unknown_user&quot;;
+//        String email = attributes.get(&quot;email&quot;) != null ? attributes.get(&quot;email&quot;).toString() : &quot;unknown_email&quot;;
+//        String cognitoUuid = attributes.get(&quot;sub&quot;) != null ? attributes.get(&quot;sub&quot;).toString() : &quot;unknown_uuid&quot;;
+//
+//        userService.saveOrUpdateUser(username, email, cognitoUuid);
+//
+//        // ✅ Construct the correct redirect URL
+//        String redirectUrl = String.format(&quot;http://127.0.0.1:5500/src/main/resources/static/index.html?username=%s&amp;email=%s&amp;access_token=%s&quot;,
+//                username, email, accessToken);
+//
+//        System.out.println(&quot;Redirecting to: &quot; + redirectUrl);
+//
+//        response.setHeader(&quot;Location&quot;, redirectUrl);
+//        return ResponseEntity.status(HttpStatus.FOUND).build(); // 302 Redirect
+//    }
+
+
+    @GetMapping(&quot;/post-login&quot;)
+    public ResponseEntity&lt;Void&gt; postLogin(
+            OAuth2AuthenticationToken authentication,
+            @RequestHeader(value = &quot;Referer&quot;, required = false) String referer,
+            HttpServletResponse response) {
+
+<span class="nc" id="L74">        Map&lt;String, Object&gt; attributes = authentication.getPrincipal().getAttributes();</span>
+<span class="nc" id="L75">        OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(</span>
+<span class="nc" id="L76">                authentication.getAuthorizedClientRegistrationId(),</span>
+<span class="nc" id="L77">                authentication.getName()</span>
+        );
+
+<span class="nc bnc" id="L80" title="All 4 branches missed.">        String accessToken = (authorizedClient != null &amp;&amp; authorizedClient.getAccessToken() != null)</span>
+<span class="nc" id="L81">                ? authorizedClient.getAccessToken().getTokenValue()</span>
+<span class="nc" id="L82">                : &quot;no_access_token&quot;;</span>
+
+<span class="nc" id="L84">        String username = attributes.getOrDefault(&quot;username&quot;, &quot;unknown_user&quot;).toString();</span>
+<span class="nc" id="L85">        String email = attributes.getOrDefault(&quot;email&quot;, &quot;unknown_email&quot;).toString();</span>
+<span class="nc" id="L86">        String cognitoUuid = attributes.getOrDefault(&quot;sub&quot;, &quot;unknown_uuid&quot;).toString();</span>
+
+<span class="nc" id="L88">        userService.saveOrUpdateUser(username, email, cognitoUuid);</span>
+
+        // ✅ Check referer to determine redirect
+<span class="nc" id="L91">        String finalRedirectUrl = &quot;http://localhost:5500/src/main/resources/static/legacy/index.html&quot;; // Default to HTML</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (referer != null) {</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">            if (referer.contains(&quot;5500&quot;)) {</span>
+<span class="nc" id="L94">                finalRedirectUrl = &quot;http://localhost:5500/src/main/resources/static/legacy/index.html&quot;;</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            } else if (referer.contains(&quot;8081&quot;)) {</span>
+<span class="nc" id="L96">                finalRedirectUrl = &quot;http://localhost:8081/src/main/resources/static/index.html&quot;;</span>
+            }
+        }
+
+<span class="nc" id="L100">        finalRedirectUrl = String.format(&quot;%s?username=%s&amp;email=%s&amp;access_token=%s&quot;,</span>
+                finalRedirectUrl, username, email, accessToken);
+
+<span class="nc" id="L103">        response.setHeader(&quot;Location&quot;, finalRedirectUrl);</span>
+<span class="nc" id="L104">        return ResponseEntity.status(HttpStatus.FOUND).build(); // 302 Redirect</span>
+    }
+
+
+    @GetMapping(&quot;/user-info&quot;)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getUserInfo(@AuthenticationPrincipal OidcUser oidcUser) {
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (oidcUser == null) {</span>
+<span class="nc" id="L111">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
+        }
+
+        // ✅ Retrieve user details from the ID token
+<span class="nc" id="L115">        String username = oidcUser.getAttribute(&quot;cognito:username&quot;);</span>
+<span class="nc" id="L116">        String email = oidcUser.getAttribute(&quot;email&quot;);</span>
+<span class="nc" id="L117">        String accessToken = oidcUser.getIdToken().getTokenValue();</span>
+
+<span class="nc" id="L119">        return ResponseEntity.ok(Map.of(</span>
+                &quot;username&quot;, username,
+                &quot;email&quot;, email,
+                &quot;access_token&quot;, accessToken
+        ));
+    }
+
+
+    @PostMapping(&quot;/post-logout&quot;)
+    public ResponseEntity&lt;?&gt; logout(HttpServletRequest request, HttpServletResponse response) {
+<span class="nc" id="L129">        Cookie cookie = new Cookie(&quot;access_token&quot;, null); // Nullify the cookie</span>
+<span class="nc" id="L130">        cookie.setHttpOnly(false);</span>
+<span class="nc" id="L131">        cookie.setSecure(true); // Match security settings</span>
+<span class="nc" id="L132">        cookie.setPath(&quot;/&quot;);</span>
+<span class="nc" id="L133">        cookie.setMaxAge(0); // Expire the cookie immediately</span>
+<span class="nc" id="L134">        response.addCookie(cookie);</span>
+<span class="nc" id="L135">        return ResponseEntity.ok(&quot;Logged out successfully.&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

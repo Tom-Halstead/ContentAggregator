@@ -1,0 +1,25 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Content Aggregator,com.contentaggregator,ContentAggregator,8,0,0,0,3,0,2,0,2,0
+Content Aggregator,com.contentaggregator.exception,RedditApiException,9,0,0,0,4,0,2,0,2,0
+Content Aggregator,com.contentaggregator.exception,NewsApiException,9,0,0,0,4,0,2,0,2,0
+Content Aggregator,com.contentaggregator.exception,ResourceNotFoundException,0,4,0,0,0,2,0,1,0,1
+Content Aggregator,com.contentaggregator.exception,GlobalExceptionHandler,91,0,0,0,18,0,7,0,7,0
+Content Aggregator,com.contentaggregator.exception,InvalidNewsRequestException,9,0,0,0,4,0,2,0,2,0
+Content Aggregator,com.contentaggregator.model,NewsSource,219,17,40,0,4,4,31,5,11,5
+Content Aggregator,com.contentaggregator.model,UserNewsSource,192,24,38,0,3,5,30,3,11,3
+Content Aggregator,com.contentaggregator.model,User,61,14,0,0,25,7,11,4,11,4
+Content Aggregator,com.contentaggregator.model,UserNewsSourceId,90,0,10,0,5,0,15,0,10,0
+Content Aggregator,com.contentaggregator.controller,NewsSourceController,21,0,0,0,7,0,3,0,3,0
+Content Aggregator,com.contentaggregator.controller,ExternalNewsController,44,0,0,0,11,0,5,0,5,0
+Content Aggregator,com.contentaggregator.controller,RedditController,41,0,0,0,11,0,5,0,5,0
+Content Aggregator,com.contentaggregator.controller,AuthController,156,0,12,0,37,0,10,0,4,0
+Content Aggregator,com.contentaggregator.controller,UserNewsSourceController,11,0,0,0,4,0,2,0,2,0
+Content Aggregator,com.contentaggregator.response,NewsApiResponse,138,0,24,0,4,0,23,0,11,0
+Content Aggregator,com.contentaggregator.config,AppSecurityConfig,328,0,0,0,54,0,24,0,24,0
+Content Aggregator,com.contentaggregator.service,NewsSourceService,22,0,0,0,6,0,4,0,4,0
+Content Aggregator,com.contentaggregator.service,UserNewsSourceService,7,80,0,0,2,16,0,6,0,6
+Content Aggregator,com.contentaggregator.service,ExternalNewsService,301,0,36,0,58,0,26,0,8,0
+Content Aggregator,com.contentaggregator.service,UserService,66,0,2,0,13,0,7,0,6,0
+Content Aggregator,com.contentaggregator.service,RedditService,159,0,10,0,34,0,11,0,6,0
+Content Aggregator,com.contentaggregator.dto,RedditPostDTO,216,0,40,0,7,0,34,0,14,0
+Content Aggregator,com.contentaggregator.dto,NewsArticleDTO,195,0,38,0,5,0,32,0,13,0

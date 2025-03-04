@@ -3,9 +3,15 @@ C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\Co
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\controller\AuthController.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\controller\ExternalNewsController.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\controller\NewsSourceController.java
+C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\controller\RedditController.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\controller\UserNewsSourceController.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\dto\NewsArticleDTO.java
-C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\dto\NewsSourceDTO.java
+C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\dto\RedditPostDTO.java
+C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\exception\GlobalExceptionHandler.java
+C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\exception\InvalidNewsRequestException.java
+C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\exception\NewsApiException.java
+C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\exception\RedditApiException.java
+C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\exception\ResourceNotFoundException.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\model\NewsSource.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\model\User.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\model\UserNewsSource.java
@@ -16,5 +22,6 @@ C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\re
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\response\NewsApiResponse.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\service\ExternalNewsService.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\service\NewsSourceService.java
+C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\service\RedditService.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\service\UserNewsSourceService.java
 C:\Users\tommy\Projects\ContentAggregator\src\main\java\com\contentaggregator\service\UserService.java

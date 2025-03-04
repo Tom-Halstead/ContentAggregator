@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Content Aggregator</a> &gt; <a href="index.source.html" class="el_package">com.contentaggregator.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.contentaggregator.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+<span class="nc" id="L12">public class GlobalExceptionHandler {</span>
+
+    // Reddit API errors
+    @ExceptionHandler(RedditApiException.class)
+    public ResponseEntity&lt;String&gt; handleRedditApiException(RedditApiException ex) {
+<span class="nc" id="L17">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(&quot;Error Fetching Reddit Posts: &quot; + ex.getMessage());</span>
+    }
+
+    // General runtime exceptions
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity&lt;String&gt; handleRuntimeException(RuntimeException ex) {
+<span class="nc" id="L23">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L24">                .body(&quot;Unexpected server error: &quot; + ex.getMessage());</span>
+    }
+
+    // Generic error handler for all other exceptions
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;String&gt; handleGenericException(Exception ex) {
+<span class="nc" id="L30">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L31">                .body(&quot;An unexpected error occurred. Please try again later.&quot;);</span>
+    }
+
+    /**
+     * Handles errors from external news API calls.
+     */
+    @ExceptionHandler(NewsApiException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleNewsApiException(NewsApiException ex) {
+<span class="nc" id="L39">        Map&lt;String, Object&gt; errorResponse = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L40">        errorResponse.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L41">        errorResponse.put(&quot;status&quot;, HttpStatus.BAD_GATEWAY.value());</span>
+
+<span class="nc" id="L43">        return new ResponseEntity&lt;&gt;(errorResponse, HttpStatus.BAD_GATEWAY);</span>
+    }
+
+    /**
+     * Handles invalid user requests for fetching news articles.
+     */
+    @ExceptionHandler(InvalidNewsRequestException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleInvalidNewsRequestException(InvalidNewsRequestException ex) {
+<span class="nc" id="L51">        Map&lt;String, Object&gt; errorResponse = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L52">        errorResponse.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L53">        errorResponse.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());</span>
+
+<span class="nc" id="L55">        return new ResponseEntity&lt;&gt;(errorResponse, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    /**
+     * Handles resource not found errors.
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleResourceNotFoundException(ResourceNotFoundException ex) {
+<span class="nc" id="L63">        Map&lt;String, Object&gt; errorResponse = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L64">        errorResponse.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L65">        errorResponse.put(&quot;status&quot;, HttpStatus.NOT_FOUND.value());</span>
+
+<span class="nc" id="L67">        return new ResponseEntity&lt;&gt;(errorResponse, HttpStatus.NOT_FOUND);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
