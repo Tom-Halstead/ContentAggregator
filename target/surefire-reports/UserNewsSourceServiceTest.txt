@@ -1,4 +1,35 @@
 -------------------------------------------------------------------------------
 Test set: UserNewsSourceServiceTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.862 s -- in UserNewsSourceServiceTest
+Tests run: 5, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 2.772 s <<< FAILURE! -- in UserNewsSourceServiceTest
+UserNewsSourceServiceTest.testAddUserSource_NewsSourceNotFound -- Time elapsed: 0.051 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <com.contentaggregator.exception.ResourceNotFoundException> but was: <org.mockito.exceptions.misusing.PotentialStubbingProblem>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at UserNewsSourceServiceTest.testAddUserSource_NewsSourceNotFound(UserNewsSourceServiceTest.java:133)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: org.mockito.exceptions.misusing.PotentialStubbingProblem: 
+Strict stubbing argument mismatch. Please check:
+ - this invocation of 'findById' method:
+    newsSourceRepository.findById(989);
+    -> at com.contentaggregator.service.UserNewsSourceService.addUserSource(UserNewsSourceService.java:53)
+ - has following stubbing(s) with different arguments:
+    1. newsSourceRepository.findById(999);
+      -> at UserNewsSourceServiceTest.testAddUserSource_NewsSourceNotFound(UserNewsSourceServiceTest.java:130)
+Typically, stubbing argument mismatch indicates user mistake when writing tests.
+Mockito fails early so that you can debug potential problem easily.
+However, there are legit scenarios when this exception generates false negative signal:
+  - stubbing the same method multiple times using 'given().will()' or 'when().then()' API
+    Please use 'will().given()' or 'doReturn().when()' API for stubbing.
+  - stubbed method is intentionally invoked with different arguments by code under test
+    Please use default or 'silent' JUnit Rule (equivalent of Strictness.LENIENT).
+For more information see javadoc for PotentialStubbingProblem class.
+	at com.contentaggregator.service.UserNewsSourceService.addUserSource(UserNewsSourceService.java:53)
+	at UserNewsSourceServiceTest.lambda$3(UserNewsSourceServiceTest.java:134)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 6 more
+
