@@ -181,14 +181,15 @@ document.addEventListener("DOMContentLoaded", () => {
   new ContentManager();
 
   const header = document.querySelector(".header");
-  const stickySetPoint = header.offsetHeight * 3;
+  const windowHeightSetpoint = window.innerHeight / 4;
 
   window.addEventListener("scroll", () => {
-    if (window.scrollY >= stickySetPoint) {
+    if (window.scrollY >= windowHeightSetpoint) {
       header.style.position = "fixed";
       header.style.top = 0;
     } else {
       header.style.position = "relative";
+      header.style.top = "";
     }
   });
 });
