@@ -2,6 +2,7 @@ package com.contentaggregator.service;
 
 
 import com.contentaggregator.dto.RedditPostDTO;
+import com.contentaggregator.exception.RedditApiException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
@@ -11,13 +12,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -54,7 +55,7 @@ public class RedditService {
      * @param uri Fully constructed Reddit API URI.
      * @return List of RedditPostDTO.
      */
-    private List<RedditPostDTO> fetchPostsFromApi(URI uri) {
+    public List<RedditPostDTO> fetchPostsFromApi(URI uri) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.USER_AGENT, "ContentAggregatorApp/1.0"); // Reddit requires a User-Agent
 
@@ -65,6 +66,7 @@ public class RedditService {
                     uri, HttpMethod.GET, requestEntity, JsonNode.class
             );
 
+            // If the response is successful and contains valid data
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 JsonNode children = response.getBody().path("data").path("children");
 
@@ -77,15 +79,18 @@ public class RedditService {
                     }
                     return posts;
                 }
-            } else {
-                throw new RuntimeException("Failed to fetch Reddit posts. Status: " + response.getStatusCode());
             }
 
-        } catch (Exception e) {
-            throw new RuntimeException("An error occurred while fetching Reddit posts", e);
-        }
+            // If response is not successful, throw an exception
+            throw new RedditApiException("Failed to fetch Reddit posts. Status: " + response.getStatusCode());
 
-        return Collections.emptyList();
+        } catch (HttpClientErrorException e) {
+            // Handle specific HTTP exceptions from the Reddit API
+            throw new RedditApiException("Reddit API request failed: " + e.getStatusCode() + " - ");
+        } catch (Exception e) {
+            // Catch any unexpected exceptions and wrap them in a custom exception
+            throw new RedditApiException("An error occurred while fetching Reddit posts", e);
+        }
     }
 
     /**

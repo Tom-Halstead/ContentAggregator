@@ -166,7 +166,7 @@ class ContentManager {
     } else if (article.description) {
       const description = document.createElement("p");
       description.textContent = article.description;
-      description.style.fontFamily = "Times New Roman, Times, serif";
+      description.style.fontFamily = "Noto Sans Display, sans, serif";
       link.appendChild(description);
     }
 
@@ -178,4 +178,16 @@ class ContentManager {
 // Initialize ContentManager on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   new ContentManager();
+
+  const header = document.querySelector(".header");
+  const stickySetPoint = header.offsetHeight * 3;
+
+  window.addEventListener("scroll", () => {
+    if (window.scrollY >= stickySetPoint) {
+      header.style.position = "fixed";
+      header.style.top = 0;
+    } else {
+      header.style.position = "relative";
+    }
+  });
 });

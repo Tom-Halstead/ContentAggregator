@@ -24,31 +24,47 @@ body {
 }
 
 body {
-  font-family: "Courier New", Courier, monospace;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* overflow-x: hidden; */
 }
 
 header {
-  min-height: 4em;
+  position: relative;
+  min-height: 67px;
+  max-height: 67px;
   height: 5em;
   display: flex;
-  position: sticky;
-  top: 0;
   flex-wrap: wrap;
   align-items: center;
   --gradient-direction: to bottom;
   color: white;
   z-index: 1000;
   width: 100%;
+  transition: all 0.5s ease-in-out;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.main-nav {
+  min-height: 67px;
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  justify-content: space-evenly;
+  flex: 1;
 }
 
 .main-nav a {
+  color: #ffffff;
+  font-family: "Kanit", sans-serif;
+  font-weight: 300;
   padding: 10px;
   margin: 10px;
+}
+
+.title {
+  font-family: "Montserrat", sans-serif;
 }
 
 .shared-gradient {
@@ -104,14 +120,19 @@ header {
 }
 
 #randomize {
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
-  font-weight: bold;
+  font-weight: 500;
   font-size: 1em;
   margin: 1em;
   padding: 10px 10px 10px 10px;
   border: 1px black solid;
   border-radius: 0.8em;
   background-color: #dadada;
+  letter-spacing: 0.1em;
+}
+
+footer > p {
+  font-family: "Kanit", sans-serif;
+  font-weight: 200;
   letter-spacing: 0.1em;
 }
 
@@ -125,13 +146,6 @@ header {
     #00c0ff 100%
   );
   animation: slidebg 5s linear infinite;
-}
-
-.main-nav {
-  display: flex;
-  gap: 20px;
-  justify-content: space-evenly;
-  flex: 1;
 }
 
 nav a {
@@ -186,8 +200,14 @@ article {
 
 div.row img {
   width: 320px;
-  /* width: max-content; */
-  /* max-width: fit-content; */
+}
+
+.news-p {
+  font-family: "Noto Sans Display", sans-serif;
+}
+
+div.row > a > h3 {
+  font-family: "Noto Sans Display", sans-serif;
 }
 
 .row:hover {
