@@ -161,19 +161,16 @@ class AuthManager {
    */
   displayWelcomeMessage(username = null) {
     const hour = new Date().getHours();
-    let message = "Hope you're having a great night, "; // Default neutral night-time message
+    let message = username
+      ? `Hope you're having a great night, ${username}!`
+      : `Hope you're having a great night!`;
 
     if (hour >= 5 && hour < 12) {
-      message = "Good morning, ";
+      username ? (message = `Good morning, ${username}!`) : `Good Morning!`;
     } else if (hour >= 12 && hour < 18) {
-      message = "Good afternoon, ";
+      username ? (message = `Good afternoon, ${username}!`) : `Good Afternoon!`;
     } else if (hour >= 18 && hour < 22) {
-      message = "Good evening, ";
-    }
-
-    // Append username if available
-    if (username) {
-      message += ` ${username}!`;
+      username ? (message = `Good evening, ${username}!`) : `Good Evening!`;
     }
 
     // Update the welcome message in the UI

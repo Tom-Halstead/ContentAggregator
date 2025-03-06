@@ -149,19 +149,16 @@ class ContentManager {
     const row = document.createElement("div");
     row.classList.add("row");
 
-    // Create clickable link wrapping the entire content
     const link = document.createElement("a");
     link.href = postUrl || "#";
     link.target = "_blank";
     link.style.textDecoration = "none";
     link.style.color = "inherit";
 
-    // Article title
     const title = document.createElement("h3");
     title.textContent = article.title || "No Title";
     link.appendChild(title);
 
-    // Image or description
     if (imageUrl) {
       const img = document.createElement("img");
       img.src = imageUrl;
@@ -169,15 +166,8 @@ class ContentManager {
       img.loading = "lazy";
       link.appendChild(img);
     }
-    // else if (article.description) {
-    //   const description = document.createElement("p");
-    //   description.textContent = article.description;
-    //   description.style.fontFamily = "Noto Sans Display, sans, serif";
-    //   description.style.lineHeight = "22px";
-    //   link.appendChild(description);
-    // }
 
-    row.appendChild(link); // Add link to the row
+    row.appendChild(link);
     return row;
   }
 }

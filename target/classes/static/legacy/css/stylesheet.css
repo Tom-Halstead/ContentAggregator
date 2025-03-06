@@ -100,9 +100,9 @@ header {
   -webkit-border-radius: 50;
   -moz-border-radius: 50;
   border-radius: 50px;
-  margin-right: 4em;
+  margin-right: 2.5em;
   height: 2.2em;
-  width: 5.5em;
+  width: fit-content;
   font-family: Courier New;
   color: #ffffff;
   font-size: 1em;
@@ -125,7 +125,7 @@ header {
   font-size: 1em;
   margin: 1em;
   padding: 10px 10px 10px 10px;
-  border: 1px black solid;
+  border: 2px black solid;
   border-radius: 0.8em;
   background-color: #dadada;
   letter-spacing: 0.1em;

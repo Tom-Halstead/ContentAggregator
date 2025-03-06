@@ -98,12 +98,11 @@ public class RedditService {
      * @return List of RedditPostDTO.
      */
     public List<RedditPostDTO> fetchPostsByUserPreferences(int userId) {
-        // Placeholder: Replace with actual user preferences retrieval logic
         List<String> preferredSubreddits = List.of("technology", "news");
 
         List<RedditPostDTO> posts = new ArrayList<>();
         for (String subreddit : preferredSubreddits) {
-            posts.addAll(fetchRedditListings(5, subreddit)); // Default limit of 5 posts per subreddit
+            posts.addAll(fetchRedditListings(5, subreddit));
         }
         return posts;
     }
