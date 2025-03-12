@@ -29,94 +29,113 @@ class ContentManager {
         this.fetchRedditStories(); // Fetch Reddit stories after login
         clearInterval(interval);
       }
-    }, 500); // Check every 500ms
+    }, 500);
   }
 
   /**
    * Fetches world news articles from the backend and updates the DOM.
    */
-  async fetchWorldNews() {
-    try {
-      const accessToken = localStorage.getItem("access_token");
-      if (!accessToken)
-        throw new Error("Access token not found. Please log in.");
+  fetchWorldNews() {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      console.error("Access token not found. Please log in.");
+      return;
+    }
 
-      const response = await fetch("http://localhost:8080/api/news/articles", {
-        method: "GET",
+    axios
+      .get("http://localhost:8080/api/news/articles", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
+      })
+      .then((response) => {
+        const articles = response.data;
+        if (!Array.isArray(articles)) {
+          throw new Error(
+            "Invalid data format: Expected an array of articles."
+          );
+        }
+
+        this.clearContainers();
+
+        const validArticles = articles
+          .filter((article) => article.urlToImage)
+          .slice(0, 5);
+
+        validArticles.forEach((article) => {
+          const row = this.createArticleElement(
+            article,
+            article.urlToImage,
+            article.url
+          );
+          this.newsContainerWorld.appendChild(row);
+        });
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.error(
+            "Request was made, external news API returned a 4xx or 5xx error."
+          );
+        } else if (error.request) {
+          console.error(
+            "Request sent to exernal news API, no response received."
+          );
+        } else {
+          console.error("Unknown error fetching news stories:", error.message);
+        }
       });
-
-      if (!response.ok)
-        throw new Error(`Failed to fetch articles. Status: ${response.status}`);
-
-      const articles = await response.json();
-      if (!Array.isArray(articles))
-        throw new Error("Invalid data format: Expected an array of articles.");
-
-      this.clearContainers(); // Clear previous articles
-
-      // Filter out articles without images and limit to 5 articles
-      const validArticles = articles
-        .filter((article) => article.urlToImage)
-        .slice(0, 5);
-
-      // Add each valid article to the World news container
-      validArticles.forEach((article) => {
-        const row = this.createArticleElement(
-          article,
-          article.urlToImage,
-          article.url
-        );
-        this.newsContainerWorld.appendChild(row);
-      });
-    } catch (error) {
-      console.error("Error fetching world news:", error.message);
-    }
   }
 
   /**
    * Fetches Reddit stories from the backend and updates the DOM.
    */
-  async fetchRedditStories() {
-    try {
-      const accessToken = localStorage.getItem("access_token");
-      if (!accessToken)
-        throw new Error("Access token not found. Please log in.");
+  fetchRedditStories() {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      console.error("Access token not found. Please log in.");
+      return;
+    }
 
-      const response = await fetch("http://localhost:8080/api/reddit/posts", {
-        method: "GET",
+    axios
+      .get("http://localhost:8080/api/reddit/posts", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
+      })
+      .then((response) => {
+        const posts = response.data;
+        if (!Array.isArray(posts)) {
+          throw new Error(
+            "Invalid data format: Expected an array of Reddit posts."
+          );
+        }
+        posts.forEach((post) => {
+          const row = this.createArticleElement(
+            post,
+            post.preferredImageUrl,
+            post.thumbnail
+          );
+          this.newsContainerReddit.appendChild(row);
+        });
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.error(
+            "Request was made, external reddit API returned a 4xx or 5xx error."
+          );
+        } else if (error.request) {
+          console.error(
+            "Request sent to exernal reddit API, no response received."
+          );
+        } else {
+          console.error(
+            "Unknown error fetching Reddit stories:",
+            error.message
+          );
+        }
       });
-
-      if (!response.ok)
-        throw new Error(
-          `Failed to fetch Reddit stories. Status: ${response.status}`
-        );
-
-      const posts = await response.json();
-      if (!Array.isArray(posts))
-        throw new Error(
-          "Invalid data format: Expected an array of Reddit posts."
-        );
-
-      posts.forEach((post) => {
-        console.log(post);
-        const row = this.createArticleElement(
-          post,
-          post.preferredImageUrl || post.thumbnail,
-          post.fullPostUrl || post.permalink
-        );
-        this.newsContainerReddit.appendChild(row);
-      });
-    } catch (error) {
-      console.error("Error fetching Reddit stories:", error.message);
-    }
   }
 
   /**

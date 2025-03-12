@@ -20,6 +20,7 @@ public class RedditPostDTO {
     @JsonProperty("permalink")
     private String permalink;
 
+    @JsonProperty("fullPostUrl")
     private String fullPostUrl;
 
     @JsonProperty("thumbnail")
