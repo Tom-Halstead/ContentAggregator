@@ -16,15 +16,21 @@ public class RedditPostDTO {
 
     @JsonProperty("title")
     private String title;
-
-    @JsonProperty("permalink")
-    private String permalink;
-
-    @JsonProperty("fullPostUrl")
+    
+    // Map to the property that holds the full URL (e.g., "url_overridden_by_dest")
+    @JsonProperty("url_overridden_by_dest")
     private String fullPostUrl;
 
+    // Map to thumbnail – note: sometimes thumbnail is a small preview or a text like "self"
     @JsonProperty("thumbnail")
     private String thumbnail;
 
+    // Add a property to determine if the post is a video.
+    @JsonProperty("is_video")
+    private boolean isVideo;
+
+    // Optionally, map the image/video URL (if available) from "url"
+    @JsonProperty("url")
+    private String url;
 
 }

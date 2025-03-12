@@ -112,11 +112,17 @@ class ContentManager {
           );
         }
         posts.forEach((post) => {
-          const row = this.createArticleElement(
-            post,
-            post.preferredImageUrl,
-            post.thumbnail
-          );
+          // Compute display image using the DTO logic:
+          // If it's a video, show a placeholder image;
+          // otherwise, use thumbnail if valid, or fallback to the main url.
+          let displayImage = post.is_video
+            ? "/images/reddit-placeholder.jpg"
+            : post.thumbnail;
+
+          // Use post.fullPostUrl if available, or fallback to another URL (like post.permalink)
+          console.log(post, displayImage);
+
+          const row = this.createArticleElement(post, displayImage, post.url);
           this.newsContainerReddit.appendChild(row);
         });
       })
@@ -127,7 +133,7 @@ class ContentManager {
           );
         } else if (error.request) {
           console.error(
-            "Request sent to exernal reddit API, no response received."
+            "Request sent to external reddit API, no response received."
           );
         } else {
           console.error(

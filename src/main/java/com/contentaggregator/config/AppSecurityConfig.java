@@ -119,7 +119,7 @@ public class AppSecurityConfig implements WebMvcConfigurer {
                 .csrf().disable()
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/", "/index.html", "/post-login", "/user-info", "/login/oauth2/code/**", "/login-failed", "/actuator/**").permitAll()
+                        .requestMatchers("/", "/index.html", "/post-login", "/user-info", "/login/oauth2/code/**", "/login-failed", "/actuator/**", "/legacy/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -162,8 +162,10 @@ public class AppSecurityConfig implements WebMvcConfigurer {
      */
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/").setViewName("home");
+//        registry.addViewController("/").setViewName("home");
+        registry.addRedirectViewController("/", "/legacy/index.html");
     }
+
 
     /**
      * ✅ CORS Configuration for MVC (Alternative for non-Spring Security routes)

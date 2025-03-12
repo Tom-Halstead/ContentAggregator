@@ -31,39 +31,6 @@ public class AuthController {
         this.userService = userService;
     }
 
-//    @GetMapping("/post-login")
-//    public ResponseEntity<Void> postLogin(OAuth2AuthenticationToken authentication, HttpServletResponse response) {
-//        Map<String, Object> attributes = authentication.getPrincipal().getAttributes();
-//        System.out.println("User Attributes: " + attributes);
-//
-//        // ✅ Fetch the authorized client and access token
-//        OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(
-//                authentication.getAuthorizedClientRegistrationId(),
-//                authentication.getName()
-//        );
-//
-//        String accessToken = (authorizedClient != null && authorizedClient.getAccessToken() != null)
-//                ? authorizedClient.getAccessToken().getTokenValue()
-//                : "no_access_token";
-//
-//        System.out.println("Access Token: " + accessToken);
-//
-//        String username = attributes.get("username") != null ? attributes.get("username").toString() : "unknown_user";
-//        String email = attributes.get("email") != null ? attributes.get("email").toString() : "unknown_email";
-//        String cognitoUuid = attributes.get("sub") != null ? attributes.get("sub").toString() : "unknown_uuid";
-//
-//        userService.saveOrUpdateUser(username, email, cognitoUuid);
-//
-//        // ✅ Construct the correct redirect URL
-//        String redirectUrl = String.format("http://127.0.0.1:5500/src/main/resources/static/index.html?username=%s&email=%s&access_token=%s",
-//                username, email, accessToken);
-//
-//        System.out.println("Redirecting to: " + redirectUrl);
-//
-//        response.setHeader("Location", redirectUrl);
-//        return ResponseEntity.status(HttpStatus.FOUND).build(); // 302 Redirect
-//    }
-
 
     @GetMapping("/post-login")
     public ResponseEntity<Void> postLogin(
@@ -88,14 +55,18 @@ public class AuthController {
         userService.saveOrUpdateUser(username, email, cognitoUuid);
 
         // ✅ Check referer to determine redirect
-        String finalRedirectUrl = "http://localhost:5500/src/main/resources/static/legacy/index.html"; // Default to HTML
-        if (referer != null) {
-            if (referer.contains("5500")) {
-                finalRedirectUrl = "http://localhost:5500/src/main/resources/static/legacy/index.html";
-            } else if (referer.contains("8081")) {
-                finalRedirectUrl = "http://localhost:8081/src/main/resources/static/index.html";
-            }
-        }
+//        String finalRedirectUrl = "http://localhost:5500/src/main/resources/static/legacy/index.html"; // Default to HTML
+//        if (referer != null) {
+//            if (referer.contains("5500")) {
+//                finalRedirectUrl = "http://localhost:5500/src/main/resources/static/legacy/index.html";
+//            } else if (referer.contains("8081")) {
+//                finalRedirectUrl = "http://localhost:8081/src/main/resources/static/index.html";
+//            }
+//        }
+
+
+        String finalRedirectUrl = "http://localhost:8080/legacy/index.html";
+
 
         finalRedirectUrl = String.format("%s?username=%s&email=%s&access_token=%s",
                 finalRedirectUrl, username, email, accessToken);
