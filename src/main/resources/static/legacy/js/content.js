@@ -115,12 +115,10 @@ class ContentManager {
           // Compute display image using the DTO logic:
           // If it's a video, show a placeholder image;
           // otherwise, use thumbnail if valid, or fallback to the main url.
-          let displayImage = post.is_video
-            ? "/images/reddit-placeholder.jpg"
-            : post.thumbnail;
-
-          // Use post.fullPostUrl if available, or fallback to another URL (like post.permalink)
-          console.log(post, displayImage);
+          let displayImage =
+            post.is_video || post.thumbnail === "nsfw"
+              ? "images/reddit-placeholder.jpg"
+              : post.thumbnail;
 
           const row = this.createArticleElement(post, displayImage, post.url);
           this.newsContainerReddit.appendChild(row);

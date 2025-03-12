@@ -66,7 +66,7 @@ public class RedditController {
             @RequestParam(required = false, defaultValue = "10") int limit
     ) {
 //        List<RedditPostDTO> posts = redditService.fetchRedditListings(limit, subreddit);
-        List<RedditPostDTO> posts = redditService.fetchRedditListings(5, "funny");
+        List<RedditPostDTO> posts = redditService.fetchRedditListings(5, "wtf");
         return ResponseEntity.ok(posts);
     }
 }

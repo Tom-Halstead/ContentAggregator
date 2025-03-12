@@ -1,16 +1,16 @@
 :root {
   --gap: 20px;
   --padding: 10px;
-  --color-start: #6683c4;
-  --color-mid: #91b9f0;
-  --color-end: #6ea3e0;
-  --color-end-light: #d1e7fa;
+  --color-start: #657cad;
+  --color-mid: #5a81b8;
+  --color-end: #6ea0da;
+  --color-end-light: #7eb7e9;
   --mask-opacity-start: 85%;
   --mask-opacity-end: 100%;
 }
 
 html {
-  background: linear-gradient(to bottom, #ccd8ee 0%, #e0e0e0 100%);
+  background: linear-gradient(to bottom, #8da3c9 0%, #e0e0e0 50%, #8da3c9 100%);
   background-repeat: no-repeat;
   background-attachment: fixed;
 }
