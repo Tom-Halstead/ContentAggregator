@@ -101,9 +101,12 @@ header {
   -moz-border-radius: 50;
   border-radius: 50px;
   margin-right: 2.5em;
+  padding: 0 6px 0 8px;
   height: 2.2em;
   width: fit-content;
-  font-family: Courier New;
+  font-family: "Kanit", sans-serif;
+  font-weight: 200;
+  letter-spacing: 1px;
   color: #ffffff;
   font-size: 1em;
   text-decoration: none;
