@@ -26,29 +26,51 @@ class ContentManager {
 
       if (accessToken) {
         this.fetchWorldNews();
-        this.fetchRedditStories(); // Fetch Reddit stories after login
+        this.fetchRedditStories();
+        this.fetchLocalNews();
         clearInterval(interval);
       }
     }, 500);
   }
 
-  /**
-   * Fetches world news articles from the backend and updates the DOM.
-   */
-  fetchWorldNews() {
+  // Helper method to extract the country code from the browser locale
+  getUserCountry() {
+    const locale = navigator.language || navigator.userLanguage; // e.g. "en-US"
+    if (locale && locale.includes("-")) {
+      return locale.split("-")[1].toUpperCase();
+    }
+    return "US"; // fallback
+  }
+
+  // Modular method to clear a given container
+  clearContainer(container) {
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+  }
+
+  // Fetch local news using the user's browser country code
+  fetchLocalNews() {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
       console.error("Access token not found. Please log in.");
       return;
     }
 
+    const userCountry = this.getUserCountry();
+
     axios
-      .get("http://localhost:8080/api/news/articles", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      })
+      .get(
+        `http://localhost:8080/api/news/articles?country=${encodeURIComponent(
+          userCountry
+        )}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
       .then((response) => {
         const articles = response.data;
         if (!Array.isArray(articles)) {
@@ -57,12 +79,70 @@ class ContentManager {
           );
         }
 
-        this.clearContainers();
+        // Clear the local news container using the modular clearContainer method
+        this.removeAllChildren(this.newsContainerLocal);
 
         const validArticles = articles
           .filter((article) => article.urlToImage)
           .slice(0, 5);
+        validArticles.forEach((article) => {
+          const row = this.createArticleElement(
+            article,
+            article.urlToImage,
+            article.url
+          );
+          this.newsContainerLocal.appendChild(row);
+        });
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.error(
+            "Request was made, external news API returned a 4xx or 5xx error."
+          );
+        } else if (error.request) {
+          console.error(
+            "Request sent to external news API, no response received."
+          );
+        } else {
+          console.error("Unknown error fetching local news:", error.message);
+        }
+      });
+  }
 
+  // Fetch world news, defaulting to "AF" but allowing user selection
+  fetchWorldNews(selectedCountry = "AF") {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      console.error("Access token not found. Please log in.");
+      return;
+    }
+
+    axios
+      .get(
+        `http://localhost:8080/api/news/articles?country=${encodeURIComponent(
+          selectedCountry
+        )}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        const articles = response.data;
+        if (!Array.isArray(articles)) {
+          throw new Error(
+            "Invalid data format: Expected an array of articles."
+          );
+        }
+
+        // Clear the world news container using the modular clearContainer method
+        this.removeAllChildren(this.newsContainerWorld);
+
+        const validArticles = articles
+          .filter((article) => article.urlToImage)
+          .slice(0, 5);
         validArticles.forEach((article) => {
           const row = this.createArticleElement(
             article,
@@ -79,17 +159,15 @@ class ContentManager {
           );
         } else if (error.request) {
           console.error(
-            "Request sent to exernal news API, no response received."
+            "Request sent to external news API, no response received."
           );
         } else {
-          console.error("Unknown error fetching news stories:", error.message);
+          console.error("Unknown error fetching world news:", error.message);
         }
       });
   }
 
-  /**
-   * Fetches Reddit stories from the backend and updates the DOM.
-   */
+  // Fetches Reddit stories from the backend and updates the DOM.
   fetchRedditStories() {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
@@ -111,12 +189,15 @@ class ContentManager {
             "Invalid data format: Expected an array of Reddit posts."
           );
         }
+
+        // Clear the Reddit container using the modular clearContainer method
+        this.removeAllChildren(this.newsContainerReddit);
+
         posts.forEach((post) => {
           let displayImage =
             post.is_video || post.thumbnail === "nsfw"
               ? "images/reddit-placeholder.jpg"
               : post.thumbnail;
-
           const row = this.createArticleElement(post, displayImage, post.url);
           this.newsContainerReddit.appendChild(row);
         });
@@ -137,15 +218,6 @@ class ContentManager {
           );
         }
       });
-  }
-
-  /**
-   * Clears all news containers.
-   */
-  clearContainers() {
-    this.removeAllChildren(this.newsContainerReddit);
-    this.removeAllChildren(this.newsContainerLocal);
-    this.removeAllChildren(this.newsContainerWorld);
   }
 
   /**

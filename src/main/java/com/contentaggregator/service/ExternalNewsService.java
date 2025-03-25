@@ -75,37 +75,33 @@ public class ExternalNewsService {
         return aggregatedArticles;
     }
 
-    public List<NewsArticleDTO> fetchArticles(
-            String category, String query,
-            String language
-    ) {
+    public List<NewsArticleDTO> fetchArticles(String category, String query, String country) {
         int pageSize = 5;
         int page = 1;
         StringBuilder apiUrl;
 
-        if (category != null && !category.isEmpty()) {
-            // Use /top-headlines when category is specified
+        // Force top-headlines if no category/query provided but a country is specified
+        if ((category == null || category.isEmpty()) && (query == null || query.isEmpty()) && country != null) {
+            apiUrl = new StringBuilder("https://newsapi.org/v2/top-headlines?");
+            apiUrl.append("country=").append(URLEncoder.encode(country, StandardCharsets.UTF_8)).append("&");
+        } else if (category != null && !category.isEmpty()) {
             apiUrl = new StringBuilder("https://newsapi.org/v2/top-headlines?");
             apiUrl.append("category=").append(URLEncoder.encode(category, StandardCharsets.UTF_8)).append("&");
+            apiUrl.append("country=").append(URLEncoder.encode(country, StandardCharsets.UTF_8)).append("&");
         } else {
-            // Use /everything when category is not provided
             apiUrl = new StringBuilder("https://newsapi.org/v2/everything?");
             if (query != null && !query.isEmpty()) {
                 apiUrl.append("q=").append(URLEncoder.encode(query, StandardCharsets.UTF_8)).append("&");
             }
-
         }
 
-
-        String userLanguageCode = Locale.getDefault().getLanguage();
-        // Add common parameters
-        apiUrl.append("language=").append(language != null ? language : userLanguageCode)
-                .append("&pageSize=").append(pageSize)
+        apiUrl.append("pageSize=").append(pageSize)
                 .append("&page=").append(page)
                 .append("&apiKey=").append(getNEWS_API_KEY());
 
-        return fetchArticlesFromApi(apiUrl.toString(), new HashMap<>());  // Passing empty map or any other params
+        return fetchArticlesFromApi(apiUrl.toString(), new HashMap<>());
     }
+
 
     /**
      * Handles the actual API call and maps the response to a list of NewsArticleDTO.
