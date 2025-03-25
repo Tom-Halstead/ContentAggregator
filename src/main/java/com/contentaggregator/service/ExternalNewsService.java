@@ -77,8 +77,10 @@ public class ExternalNewsService {
 
     public List<NewsArticleDTO> fetchArticles(
             String category, String query,
-            String language, String sortBy, int pageSize, int page
+            String language
     ) {
+        int pageSize = 5;
+        int page = 1;
         StringBuilder apiUrl;
 
         if (category != null && !category.isEmpty()) {
@@ -91,17 +93,15 @@ public class ExternalNewsService {
             if (query != null && !query.isEmpty()) {
                 apiUrl.append("q=").append(URLEncoder.encode(query, StandardCharsets.UTF_8)).append("&");
             }
-            if (sortBy != null && !sortBy.isEmpty()) {
-                apiUrl.append("sortBy=").append(sortBy).append("&");
-            }
+
         }
 
 
         String userLanguageCode = Locale.getDefault().getLanguage();
         // Add common parameters
         apiUrl.append("language=").append(language != null ? language : userLanguageCode)
-                .append("&pageSize=").append(pageSize > 0 ? pageSize : 5)
-                .append("&page=").append(page > 0 ? page : 1)
+                .append("&pageSize=").append(pageSize)
+                .append("&page=").append(page)
                 .append("&apiKey=").append(getNEWS_API_KEY());
 
         return fetchArticlesFromApi(apiUrl.toString(), new HashMap<>());  // Passing empty map or any other params

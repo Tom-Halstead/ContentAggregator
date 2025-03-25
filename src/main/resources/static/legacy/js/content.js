@@ -112,9 +112,6 @@ class ContentManager {
           );
         }
         posts.forEach((post) => {
-          // Compute display image using the DTO logic:
-          // If it's a video, show a placeholder image;
-          // otherwise, use thumbnail if valid, or fallback to the main url.
           let displayImage =
             post.is_video || post.thumbnail === "nsfw"
               ? "images/reddit-placeholder.jpg"

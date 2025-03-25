@@ -58,14 +58,11 @@ public class ExternalNewsController {
      */
     @GetMapping("/articles")
     public ResponseEntity<List<NewsArticleDTO>> getArticles(
-            @RequestParam(required = false) String source,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String query,
-            @RequestParam(required = false, defaultValue = "en") String language,
-            @RequestParam(required = false, defaultValue = "10") int pageSize,
-            @RequestParam(required = false, defaultValue = "1") int page
+            @RequestParam(required = false, defaultValue = "en") String language
     ) {
-        List<NewsArticleDTO> articles = externalNewsService.fetchArticles(source, category, query, language, pageSize, page);
+        List<NewsArticleDTO> articles = externalNewsService.fetchArticles(category, query, language);
         return ResponseEntity.ok(articles);
     }
 }

@@ -185,7 +185,6 @@ class AuthManager {
     this.clearSession();
     this.authTitle.innerText = "Welcome!";
 
-    // ✅ Use "localhost" instead of "127.0.0.1"
     const logoutUrl = `https://us-east-29qbfa8ryf.auth.us-east-2.amazoncognito.com/logout?client_id=5oncoq9mddhbmluooq6kpib2kj&logout_uri=${encodeURIComponent(
       "http://localhost:8080/legacy/index.html"
     )}`;
