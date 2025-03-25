@@ -75,9 +75,8 @@ public class ExternalNewsService {
         return aggregatedArticles;
     }
 
-    public List<NewsArticleDTO> fetchArticles(String category, String query, String country) {
+    public List<NewsArticleDTO> fetchArticles(String category, String query, String country, int page) {
         int pageSize = 5;
-        int page = 1;
         StringBuilder apiUrl;
 
         // If a country is provided, use the top-headlines endpoint
@@ -103,7 +102,7 @@ public class ExternalNewsService {
             }
         }
 
-        // Append common parameters
+        // Append pagination parameters
         apiUrl.append("pageSize=").append(pageSize)
                 .append("&page=").append(page)
                 .append("&apiKey=").append(getNEWS_API_KEY());

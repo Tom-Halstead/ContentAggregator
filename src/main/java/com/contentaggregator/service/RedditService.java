@@ -20,6 +20,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Getter
 @Service
@@ -43,11 +44,16 @@ public class RedditService {
      * @return List of RedditPostDTO containing relevant post data.
      */
     public List<RedditPostDTO> fetchRedditListings(int limit, String category) {
+        // Define possible time filters
+        String[] timeFilters = {"hour", "day", "week", "month", "year", "all"};
+        // Pick one at random
+        String randomTime = timeFilters[new Random().nextInt(timeFilters.length)];
         String encodedCategory = URLEncoder.encode(category, StandardCharsets.UTF_8);
-        String apiUrl = String.format("https://www.reddit.com/r/%s/top.json?t=day&limit=%d", encodedCategory, limit);
-
+        String apiUrl = String.format("https://www.reddit.com/r/%s/top.json?t=%s&limit=%d",
+                encodedCategory, randomTime, limit);
         return fetchPostsFromApi(URI.create(apiUrl));
     }
+
 
     /**
      * Makes the API call to Reddit and maps the response to RedditPostDTO list.
