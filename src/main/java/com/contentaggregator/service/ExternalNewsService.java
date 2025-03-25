@@ -80,21 +80,30 @@ public class ExternalNewsService {
         int page = 1;
         StringBuilder apiUrl;
 
-        // Force top-headlines if no category/query provided but a country is specified
-        if ((category == null || category.isEmpty()) && (query == null || query.isEmpty()) && country != null) {
+        // If a country is provided, use the top-headlines endpoint
+        if (country != null && !country.isEmpty()) {
             apiUrl = new StringBuilder("https://newsapi.org/v2/top-headlines?");
-            apiUrl.append("country=").append(URLEncoder.encode(country, StandardCharsets.UTF_8)).append("&");
-        } else if (category != null && !category.isEmpty()) {
-            apiUrl = new StringBuilder("https://newsapi.org/v2/top-headlines?");
-            apiUrl.append("category=").append(URLEncoder.encode(category, StandardCharsets.UTF_8)).append("&");
-            apiUrl.append("country=").append(URLEncoder.encode(country, StandardCharsets.UTF_8)).append("&");
+            // Include category if provided (for additional filtering)
+            if (category != null && !category.isEmpty()) {
+                apiUrl.append("category=")
+                        .append(URLEncoder.encode(category, StandardCharsets.UTF_8))
+                        .append("&");
+            }
+            // Append the country parameter
+            apiUrl.append("country=")
+                    .append(URLEncoder.encode(country, StandardCharsets.UTF_8))
+                    .append("&");
         } else {
+            // If no country is provided, fall back to the everything endpoint
             apiUrl = new StringBuilder("https://newsapi.org/v2/everything?");
             if (query != null && !query.isEmpty()) {
-                apiUrl.append("q=").append(URLEncoder.encode(query, StandardCharsets.UTF_8)).append("&");
+                apiUrl.append("q=")
+                        .append(URLEncoder.encode(query, StandardCharsets.UTF_8))
+                        .append("&");
             }
         }
 
+        // Append common parameters
         apiUrl.append("pageSize=").append(pageSize)
                 .append("&page=").append(page)
                 .append("&apiKey=").append(getNEWS_API_KEY());
@@ -109,10 +118,10 @@ public class ExternalNewsService {
     private List<NewsArticleDTO> fetchArticlesFromApi(String baseUrl, Map<String, String> userParams) {
         try {
             // Ensure at least one search parameter is provided
-            if (!userParams.containsKey("q") && !userParams.containsKey("qInTitle") && !userParams.containsKey("domains")) {
-                // If no required parameter is provided, set a default 'q' parameter
-                userParams.put("q", "latest");  // Example default, change as needed
-            }
+//            if (!userParams.containsKey("q") && !userParams.containsKey("qInTitle") && !userParams.containsKey("domains")) {
+//                // If no required parameter is provided, set a default 'q' parameter
+//                userParams.put("q", "latest");  // Example default, change as needed
+//            }
 
             // Build the API URL dynamically using URIBuilder
             URIBuilder uriBuilder = new URIBuilder(baseUrl);

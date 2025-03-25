@@ -109,8 +109,8 @@ class ContentManager {
       });
   }
 
-  // Fetch world news, defaulting to "AF" but allowing user selection
-  fetchWorldNews(selectedCountry = "AF") {
+  // Fetch world news, defaulting to "CA" but allowing user selection
+  fetchWorldNews(selectedCountry = "CA") {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
       console.error("Access token not found. Please log in.");
@@ -131,7 +131,9 @@ class ContentManager {
       )
       .then((response) => {
         const articles = response.data;
-        if (!Array.isArray(articles)) {
+        console.log(articles);
+
+        if (!Array.isArray(articles) || articles.length === 0) {
           throw new Error(
             "Invalid data format: Expected an array of articles."
           );
@@ -194,6 +196,7 @@ class ContentManager {
         this.removeAllChildren(this.newsContainerReddit);
 
         posts.forEach((post) => {
+          console.log(post);
           let displayImage =
             post.is_video || post.thumbnail === "nsfw"
               ? "images/reddit-placeholder.jpg"

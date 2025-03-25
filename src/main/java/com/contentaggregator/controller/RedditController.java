@@ -63,10 +63,9 @@ public class RedditController {
     @GetMapping("/posts")
     public ResponseEntity<List<RedditPostDTO>> getPosts(
             @RequestParam(required = false, defaultValue = "all") String subreddit,
-            @RequestParam(required = false, defaultValue = "10") int limit
+            @RequestParam(required = false, defaultValue = "5") int limit
     ) {
-//        List<RedditPostDTO> posts = redditService.fetchRedditListings(limit, subreddit);
-        List<RedditPostDTO> posts = redditService.fetchRedditListings(5, "wtf");
+        List<RedditPostDTO> posts = redditService.fetchRedditListings(limit, subreddit);
         return ResponseEntity.ok(posts);
     }
 }
