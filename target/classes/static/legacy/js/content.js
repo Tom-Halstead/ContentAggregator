@@ -32,9 +32,10 @@ class ContentManager {
     const interval = setInterval(() => {
       const accessToken = localStorage.getItem("access_token");
       if (accessToken) {
-        this.fetchWorldNews(); // initial world news (default page 1)
-        this.fetchRedditStories(); // initial reddit posts
-        this.fetchLocalNews(); // local news
+        // Initial fetches (default pages/categories)
+        this.fetchWorldNews(); // world news (default page 1)
+        this.fetchRedditStories(); // Reddit posts (backend randomizes via time filter)
+        this.fetchLocalNews(); // local news (default page 1, no category)
         clearInterval(interval);
       }
     }, 500);
@@ -42,11 +43,11 @@ class ContentManager {
 
   // Helper method to extract the country code from the browser locale
   getUserCountry() {
-    const locale = navigator.language || navigator.userLanguage;
+    const locale = navigator.language || navigator.userLanguage; // e.g. "en-US"
     if (locale && locale.includes("-")) {
       return locale.split("-")[1].toUpperCase();
     }
-    return "US";
+    return "US"; // fallback
   }
 
   // Modular method to clear a given container
@@ -56,33 +57,35 @@ class ContentManager {
     }
   }
 
-  // Utility to remove all children (alias of clearContainer)
+  // Alias for clearContainer
   removeAllChildren(container) {
     this.clearContainer(container);
   }
 
   /**
    * Fetch local news using the user's browser country code.
+   * Now accepts an optional page number and category.
    */
-  fetchLocalNews() {
+  fetchLocalNews(page = 1, category = "") {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
       console.error("Access token not found. Please log in.");
       return;
     }
     const userCountry = this.getUserCountry();
+    let url = `http://localhost:8080/api/news/articles?country=${encodeURIComponent(
+      userCountry
+    )}&page=${page}`;
+    if (category && category.trim().length > 0) {
+      url += `&category=${encodeURIComponent(category)}`;
+    }
     axios
-      .get(
-        `http://localhost:8080/api/news/articles?country=${encodeURIComponent(
-          userCountry
-        )}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      .get(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      })
       .then((response) => {
         const articles = response.data;
         if (!Array.isArray(articles)) {
@@ -231,7 +234,8 @@ class ContentManager {
 
   /**
    * Handles the Random News button click.
-   * Randomizes the world news page parameter and refreshes Reddit posts.
+   * Randomizes the world news page parameter and randomizes local news by
+   * both page and category.
    */
   handleRandomNews() {
     const accessToken = localStorage.getItem("access_token");
@@ -239,11 +243,28 @@ class ContentManager {
       console.error("Access token not found. Please log in.");
       return;
     }
-    // Generate a random page number between 1 and 10 (adjust range as needed)
-    const randomPage = Math.floor(Math.random() * 10) + 1;
-    // Fetch new world news using the random page number.
-    this.fetchWorldNews("US", randomPage);
-    // Also refresh Reddit posts (the backend randomizes via its time filter)
+    // Randomize world news: random page between 1 and 100.
+    const randomWorldPage = Math.floor(Math.random() * 100) + 1;
+    // Randomize local news: random page between 1 and 20.
+    const randomLocalPage = Math.floor(Math.random() * 20) + 1;
+    // For local news, choose a random category from a list.
+    const localCategories = [
+      "business",
+      "entertainment",
+      "general",
+      "health",
+      "science",
+      "sports",
+      "technology",
+    ];
+    const randomLocalCategory =
+      localCategories[Math.floor(Math.random() * localCategories.length)];
+
+    // Fetch new world news with the random page.
+    this.fetchWorldNews("US", randomWorldPage);
+    // Fetch new local news with the random page and random category.
+    this.fetchLocalNews(randomLocalPage, randomLocalCategory);
+    // Also refresh Reddit posts (the backend randomizes via its time filter).
     this.fetchRedditStories();
   }
 
