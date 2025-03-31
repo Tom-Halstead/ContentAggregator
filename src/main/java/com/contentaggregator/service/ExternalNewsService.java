@@ -76,7 +76,7 @@ public class ExternalNewsService {
     }
 
     public List<NewsArticleDTO> fetchArticles(String category, String query, String country, int page) {
-        int pageSize = 5;
+        int pageSize = 20;
         StringBuilder apiUrl;
 
         // If a country is provided, use the top-headlines endpoint
@@ -116,11 +116,6 @@ public class ExternalNewsService {
      */
     private List<NewsArticleDTO> fetchArticlesFromApi(String baseUrl, Map<String, String> userParams) {
         try {
-            // Ensure at least one search parameter is provided
-//            if (!userParams.containsKey("q") && !userParams.containsKey("qInTitle") && !userParams.containsKey("domains")) {
-//                // If no required parameter is provided, set a default 'q' parameter
-//                userParams.put("q", "latest");  // Example default, change as needed
-//            }
 
             // Build the API URL dynamically using URIBuilder
             URIBuilder uriBuilder = new URIBuilder(baseUrl);

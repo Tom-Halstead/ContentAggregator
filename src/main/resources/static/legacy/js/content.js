@@ -244,7 +244,7 @@ class ContentManager {
       return;
     }
     // Randomize world news: random page between 1 and 100.
-    const randomWorldPage = Math.floor(Math.random() * 100) + 1;
+    const randomWorldPage = Math.floor(Math.random() * 10) + 1;
     // Randomize local news: random page between 1 and 20.
     const randomLocalPage = Math.floor(Math.random() * 20) + 1;
     // For local news, choose a random category from a list.
