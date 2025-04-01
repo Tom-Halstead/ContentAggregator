@@ -48,7 +48,7 @@ public class RedditController {
 
     /**
      * ✅ GET /api/reddit/users/{userId}/posts
-     * Fetch posts based on user's preferred subreddits (if stored in the database).
+     * Fetch posts based on user's preferred subreddits (if stored in the database)
      */
     @GetMapping("/users/{userId}/posts")
     public ResponseEntity<List<RedditPostDTO>> getPostsByUserPreferences(@PathVariable int userId) {
